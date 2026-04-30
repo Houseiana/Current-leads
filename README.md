@@ -54,6 +54,25 @@ npm run build
 npm run start
 ```
 
+## Deploying to Vercel
+
+The repo is already connected to https://vercel.com/devweb3-outlookcoms-projects/current-leads — every push to `main` deploys automatically.
+
+To sync env vars from your local `.env.local` to all three Vercel environments (production / preview / development):
+
+```bash
+npm install -g vercel        # one-time
+vercel login                 # one-time
+./scripts/sync-vercel-env.sh # link + push DATABASE_URL, SESSION_SECRET, ADMIN_*, SALES_*
+vercel --prod                # trigger production deploy
+```
+
+After the first deploy, run the database setup once (against the same Neon DB) so tables exist and users are seeded:
+
+```bash
+npm run db:setup
+```
+
 ## Project Layout
 
 ```
