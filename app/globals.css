@@ -352,6 +352,11 @@ button {
   color: #155e75;
   border-color: #67e8f9;
 }
+.badge.notinterested {
+  background: #f3f4f6;
+  color: #4b5563;
+  border-color: #d1d5db;
+}
 
 .form-grid {
   display: grid;

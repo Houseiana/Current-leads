@@ -5,6 +5,7 @@ const STATUS_CLASS = {
   "Follow Ups": "followups",
   "Sent Unit": "sentunit",
   "List His Unit": "listunit",
+  "Not Interested": "notinterested",
 };
 
 const STATUS_KEY = {
@@ -12,6 +13,7 @@ const STATUS_KEY = {
   "Follow Ups": "statusFollowUps",
   "Sent Unit": "statusSentUnit",
   "List His Unit": "statusListUnit",
+  "Not Interested": "statusNotInterested",
 };
 
 export default function StatusBadge({ status, t }) {

@@ -46,6 +46,7 @@ export default function ContactedLeadsSection({
       "Follow Ups": 0,
       "Sent Unit": 0,
       "List His Unit": 0,
+      "Not Interested": 0,
     };
     leads.forEach((l) => {
       if (counts[l.status] !== undefined) counts[l.status] += 1;
@@ -97,6 +98,7 @@ export default function ContactedLeadsSection({
           { label: t.statusFollowUps, value: stats["Follow Ups"] },
           { label: t.statusSentUnit, value: stats["Sent Unit"] },
           { label: t.statusListUnit, value: stats["List His Unit"] },
+          { label: t.statusNotInterested, value: stats["Not Interested"] },
         ]}
       />
 
