@@ -2,14 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translations } from "@/lib/translations";
-import {
-  STORAGE_KEYS,
-  loadLanguage,
-  loadList,
-  saveLanguage,
-  saveList,
-} from "@/lib/storage";
-import { nowISO, uid } from "@/lib/utils";
+import { loadLanguage, saveLanguage } from "@/lib/storage";
 import Header from "@/components/Header";
 import GlobalPhoneSearch from "@/components/GlobalPhoneSearch";
 import FreshLeadsSection from "@/components/FreshLeadsSection";
@@ -17,12 +10,29 @@ import ContactedLeadsSection from "@/components/ContactedLeadsSection";
 import ConvertFreshLeadModal from "@/components/ConvertFreshLeadModal";
 import Toast from "@/components/Toast";
 
+async function jsonFetch(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data?.error || "Request failed");
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
 export default function HomePage() {
   const [language, setLanguage] = useState("en");
+  const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("fresh");
   const [freshLeads, setFreshLeads] = useState([]);
   const [contactedLeads, setContactedLeads] = useState([]);
-  const [hydrated, setHydrated] = useState(false);
   const [convertingLead, setConvertingLead] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -31,9 +41,6 @@ export default function HomePage() {
 
   useEffect(() => {
     setLanguage(loadLanguage());
-    setFreshLeads(loadList(STORAGE_KEYS.fresh));
-    setContactedLeads(loadList(STORAGE_KEYS.contacted));
-    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -43,13 +50,24 @@ export default function HomePage() {
     }
   }, [language, dir]);
 
-  useEffect(() => {
-    if (hydrated) saveList(STORAGE_KEYS.fresh, freshLeads);
-  }, [freshLeads, hydrated]);
+  const loadAll = async () => {
+    try {
+      const [me, fresh, contacted] = await Promise.all([
+        jsonFetch("/api/auth/me"),
+        jsonFetch("/api/fresh-leads"),
+        jsonFetch("/api/contacted-leads"),
+      ]);
+      setUser(me.user);
+      setFreshLeads(fresh.leads || []);
+      setContactedLeads(contacted.leads || []);
+    } catch {
+      // middleware will redirect to /login on auth failure
+    }
+  };
 
   useEffect(() => {
-    if (hydrated) saveList(STORAGE_KEYS.contacted, contactedLeads);
-  }, [contactedLeads, hydrated]);
+    loadAll();
+  }, []);
 
   const handleLanguageChange = (lang) => {
     setLanguage(lang);
@@ -61,77 +79,93 @@ export default function HomePage() {
     setTimeout(() => setToast(null), 2800);
   };
 
-  const handleAddFresh = (data) => {
-    const lead = {
-      id: uid(),
-      ...data,
-      createdAt: nowISO(),
-      updatedAt: nowISO(),
-    };
-    setFreshLeads((prev) => [lead, ...prev]);
-    showToast(t.successFreshAdded);
+  const handleAddFresh = async (data) => {
+    try {
+      const { lead } = await jsonFetch("/api/fresh-leads", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      setFreshLeads((prev) => [lead, ...prev]);
+      showToast(t.successFreshAdded);
+    } catch (err) {
+      showToast(err.message || t.networkError);
+    }
   };
 
-  const handleUpdateFresh = (id, data) => {
-    setFreshLeads((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, ...data, updatedAt: nowISO() } : l))
-    );
-    showToast(t.successUpdated);
+  const handleUpdateFresh = async (id, data) => {
+    try {
+      const { lead } = await jsonFetch(`/api/fresh-leads/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      setFreshLeads((prev) => prev.map((l) => (l.id === id ? lead : l)));
+      showToast(t.successUpdated);
+    } catch (err) {
+      showToast(err.message || t.networkError);
+    }
   };
 
-  const handleDeleteFresh = (id) => {
-    setFreshLeads((prev) => prev.filter((l) => l.id !== id));
-    showToast(t.successDeleted);
+  const handleDeleteFresh = async (id) => {
+    try {
+      await jsonFetch(`/api/fresh-leads/${id}`, { method: "DELETE" });
+      setFreshLeads((prev) => prev.filter((l) => l.id !== id));
+      showToast(t.successDeleted);
+    } catch (err) {
+      showToast(err.message || t.networkError);
+    }
   };
 
-  const handleAddContacted = (data) => {
-    const lead = {
-      id: uid(),
-      ...data,
-      createdAt: nowISO(),
-      updatedAt: nowISO(),
-      contactedAt: nowISO(),
-    };
-    setContactedLeads((prev) => [lead, ...prev]);
-    showToast(t.successContactedAdded);
+  const handleAddContacted = async (data) => {
+    try {
+      const { lead } = await jsonFetch("/api/contacted-leads", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      setContactedLeads((prev) => [lead, ...prev]);
+      showToast(t.successContactedAdded);
+    } catch (err) {
+      showToast(err.message || t.networkError);
+    }
   };
 
-  const handleUpdateContacted = (id, data) => {
-    setContactedLeads((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, ...data, updatedAt: nowISO() } : l))
-    );
-    showToast(t.successUpdated);
+  const handleUpdateContacted = async (id, data) => {
+    try {
+      const { lead } = await jsonFetch(`/api/contacted-leads/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      setContactedLeads((prev) => prev.map((l) => (l.id === id ? lead : l)));
+      showToast(t.successUpdated);
+    } catch (err) {
+      showToast(err.message || t.networkError);
+    }
   };
 
-  const handleDeleteContacted = (id) => {
-    setContactedLeads((prev) => prev.filter((l) => l.id !== id));
-    showToast(t.successDeleted);
+  const handleDeleteContacted = async (id) => {
+    try {
+      await jsonFetch(`/api/contacted-leads/${id}`, { method: "DELETE" });
+      setContactedLeads((prev) => prev.filter((l) => l.id !== id));
+      showToast(t.successDeleted);
+    } catch (err) {
+      showToast(err.message || t.networkError);
+    }
   };
 
-  const handleConvertConfirm = (extraData) => {
+  const handleConvertConfirm = async (extraData) => {
     if (!convertingLead) return;
-    const newContacted = {
-      id: uid(),
-      name: convertingLead.name,
-      phone: convertingLead.phone,
-      area: convertingLead.area,
-      email: extraData.email || "",
-      unit: extraData.unit || "",
-      salesName: extraData.salesName || "",
-      salesPhoneUsed: extraData.salesPhoneUsed || "",
-      salesWhatsAppUsed: extraData.salesWhatsAppUsed || "",
-      status: extraData.status || "Called",
-      houseianaUnitLink: extraData.houseianaUnitLink || "",
-      webLeadSourceLink: convertingLead.leadSourceLink || "",
-      createdAt: convertingLead.createdAt || nowISO(),
-      updatedAt: nowISO(),
-      contactedAt: nowISO(),
-    };
-    setContactedLeads((prev) => [newContacted, ...prev]);
-    setFreshLeads((prev) => prev.filter((l) => l.id !== convertingLead.id));
-    setConvertingLead(null);
-    setActiveTab("contacted");
-    showToast(t.successConverted);
+    try {
+      const { lead } = await jsonFetch(
+        `/api/fresh-leads/${convertingLead.id}/convert`,
+        { method: "POST", body: JSON.stringify(extraData) }
+      );
+      setFreshLeads((prev) => prev.filter((l) => l.id !== convertingLead.id));
+      setContactedLeads((prev) => [lead, ...prev]);
+      setConvertingLead(null);
+      setActiveTab("contacted");
+      showToast(t.successConverted);
+    } catch (err) {
+      showToast(err.message || t.networkError);
+    }
   };
 
   return (
@@ -140,13 +174,10 @@ export default function HomePage() {
         t={t}
         language={language}
         onLanguageChange={handleLanguageChange}
+        user={user}
       />
       <main className="container">
-        <GlobalPhoneSearch
-          t={t}
-          freshLeads={freshLeads}
-          contactedLeads={contactedLeads}
-        />
+        <GlobalPhoneSearch t={t} language={language} />
 
         <div className="tabs" role="tablist">
           <button

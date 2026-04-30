@@ -1,36 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import { phonesMatch } from "@/lib/utils";
 import StatusBadge from "./StatusBadge";
+import { formatDate } from "@/lib/utils";
 
-export default function GlobalPhoneSearch({ t, freshLeads, contactedLeads }) {
+export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const q = query.trim();
     if (!q) {
       setResult(null);
       return;
     }
-    const inContacted = contactedLeads.find((l) => phonesMatch(l.phone, q));
-    if (inContacted) {
-      setResult({ type: "contacted", lead: inContacted });
-      return;
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/leads/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: q }),
+      });
+      if (!res.ok) {
+        setErrorMsg(t.networkError);
+        setResult(null);
+      } else {
+        const data = await res.json();
+        setResult(data);
+      }
+    } catch {
+      setErrorMsg(t.networkError);
+      setResult(null);
+    } finally {
+      setLoading(false);
     }
-    const inFresh = freshLeads.find((l) => phonesMatch(l.phone, q));
-    if (inFresh) {
-      setResult({ type: "fresh", lead: inFresh });
-      return;
-    }
-    setResult({ type: "none" });
   };
 
   const handleClear = () => {
     setQuery("");
     setResult(null);
+    setErrorMsg("");
   };
 
   return (
@@ -49,13 +62,19 @@ export default function GlobalPhoneSearch({ t, freshLeads, contactedLeads }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button type="submit" className="btn btn-primary">
-          {t.search}
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? t.loading : t.search}
         </button>
         <button type="button" className="btn" onClick={handleClear}>
           {t.clear}
         </button>
       </form>
+
+      {errorMsg && (
+        <div className="search-result not-found">
+          <h3>{errorMsg}</h3>
+        </div>
+      )}
 
       {result && result.type === "contacted" && (
         <div className="search-result found-contacted">
@@ -69,10 +88,12 @@ export default function GlobalPhoneSearch({ t, freshLeads, contactedLeads }) {
               <div className="label">{t.phone}</div>
               <div className="value">{result.lead.phone || "-"}</div>
             </div>
-            <div className="detail-item">
-              <div className="label">{t.email}</div>
-              <div className="value">{result.lead.email || "-"}</div>
-            </div>
+            {!salesMode && (
+              <div className="detail-item">
+                <div className="label">{t.email}</div>
+                <div className="value">{result.lead.email || "-"}</div>
+              </div>
+            )}
             <div className="detail-item">
               <div className="label">{t.area}</div>
               <div className="value">{result.lead.area || "-"}</div>
@@ -91,43 +112,55 @@ export default function GlobalPhoneSearch({ t, freshLeads, contactedLeads }) {
                 <StatusBadge status={result.lead.status} t={t} />
               </div>
             </div>
-            <div className="detail-item">
-              <div className="label">{t.houseianaUnitLink}</div>
-              <div className="value">
-                {result.lead.houseianaUnitLink ? (
-                  <a
-                    href={result.lead.houseianaUnitLink}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {result.lead.houseianaUnitLink}
-                  </a>
-                ) : (
-                  "-"
-                )}
+            {salesMode && result.lead.contactedAt && (
+              <div className="detail-item">
+                <div className="label">{t.contactedAt}</div>
+                <div className="value">
+                  {formatDate(result.lead.contactedAt, language)}
+                </div>
               </div>
-            </div>
-            <div className="detail-item">
-              <div className="label">{t.webLeadSourceLink}</div>
-              <div className="value">
-                {result.lead.webLeadSourceLink ? (
-                  <a
-                    href={result.lead.webLeadSourceLink}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {result.lead.webLeadSourceLink}
-                  </a>
-                ) : (
-                  "-"
-                )}
-              </div>
-            </div>
+            )}
+            {!salesMode && (
+              <>
+                <div className="detail-item">
+                  <div className="label">{t.houseianaUnitLink}</div>
+                  <div className="value">
+                    {result.lead.houseianaUnitLink ? (
+                      <a
+                        href={result.lead.houseianaUnitLink}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {result.lead.houseianaUnitLink}
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                </div>
+                <div className="detail-item">
+                  <div className="label">{t.webLeadSourceLink}</div>
+                  <div className="value">
+                    {result.lead.webLeadSourceLink ? (
+                      <a
+                        href={result.lead.webLeadSourceLink}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {result.lead.webLeadSourceLink}
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {result && result.type === "fresh" && (
+      {result && result.type === "fresh" && !salesMode && (
         <div className="search-result found-fresh">
           <h3>{t.resultFresh}</h3>
           <div className="detail-grid">
