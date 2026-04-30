@@ -547,6 +547,99 @@ button {
   font-size: 13px;
 }
 
+.login-card.login-accent-admin {
+  border-top: 4px solid var(--color-accent);
+}
+.login-card.login-accent-sales {
+  border-top: 4px solid #2563eb;
+}
+.login-card.login-accent-sales .brand-logo {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.login-footer {
+  margin-top: 16px;
+  text-align: center;
+}
+.login-back-link {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+.login-back-link:hover {
+  text-decoration: underline;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+.role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 22px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: transform 0.05s, box-shadow 0.15s;
+}
+.role-card:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.role-card.role-admin {
+  border-color: var(--color-accent);
+  background: linear-gradient(180deg, #fff 0%, var(--color-accent-soft) 100%);
+}
+.role-card.role-sales {
+  border-color: #93c5fd;
+  background: linear-gradient(180deg, #fff 0%, #dbeafe 100%);
+}
+.role-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  border: 1px solid var(--color-border);
+}
+.role-card.role-admin .role-icon {
+  background: var(--color-accent);
+  border-color: var(--color-accent-dark);
+  color: #111;
+}
+.role-card.role-sales .role-icon {
+  background: #2563eb;
+  border-color: #1e40af;
+  color: #fff;
+}
+.role-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+.role-desc {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+@media (max-width: 480px) {
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 700px) {
   .table-wrap.responsive .table {
     min-width: 0;

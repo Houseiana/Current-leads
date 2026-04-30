@@ -1,8 +1,18 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Houseiana Leads Management",
-  description: "Houseiana Leads Management Dashboard",
+  title: "Dashboard",
+  description: "Internal dashboard.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
 };
 
 export default function RootLayout({ children }) {

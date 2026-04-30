@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS contacted_leads (
   sales_phone_used TEXT,
   sales_whatsapp_used TEXT,
   status TEXT NOT NULL DEFAULT 'Called',
-  houseiana_unit_link TEXT,
+  unit_link TEXT,
   web_lead_source_link TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

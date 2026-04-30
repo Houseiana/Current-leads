@@ -123,15 +123,15 @@ export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
             {!salesMode && (
               <>
                 <div className="detail-item">
-                  <div className="label">{t.houseianaUnitLink}</div>
+                  <div className="label">{t.unitLink}</div>
                   <div className="value">
-                    {result.lead.houseianaUnitLink ? (
+                    {result.lead.unitLink ? (
                       <a
-                        href={result.lead.houseianaUnitLink}
+                        href={result.lead.unitLink}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {result.lead.houseianaUnitLink}
+                        {result.lead.unitLink}
                       </a>
                     ) : (
                       "-"

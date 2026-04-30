@@ -12,12 +12,15 @@ export async function POST(req) {
   }
   const username = (body?.username || "").trim();
   const password = body?.password || "";
+  const expectedRole = body?.expectedRole;
+
   if (!username || !password) {
     return NextResponse.json(
       { error: "Username and password are required" },
       { status: 400 }
     );
   }
+
   const user = await authenticate(username, password);
   if (!user) {
     return NextResponse.json(
@@ -25,6 +28,18 @@ export async function POST(req) {
       { status: 401 }
     );
   }
+
+  if (
+    expectedRole &&
+    expectedRole !== user.role &&
+    (expectedRole === "admin" || expectedRole === "sales")
+  ) {
+    return NextResponse.json(
+      { error: "This account is not allowed on this page." },
+      { status: 403 }
+    );
+  }
+
   await setSessionCookie({
     sub: String(user.id),
     username: user.username,

@@ -9,7 +9,7 @@
 #   3. From the project folder: ./scripts/sync-vercel-env.sh
 #
 # The script will run `vercel link` the first time so you can pick the
-# correct project (Houseiana / current-leads).
+# correct project.
 
 set -euo pipefail
 

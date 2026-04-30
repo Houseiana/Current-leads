@@ -61,11 +61,11 @@ export default function ContactedLeadDetailsModal({
           </div>
         </div>
         <div className="detail-item">
-          <div className="label">{t.houseianaUnitLink}</div>
+          <div className="label">{t.unitLink}</div>
           <div className="value">
-            {lead.houseianaUnitLink ? (
-              <a href={lead.houseianaUnitLink} target="_blank" rel="noreferrer">
-                {lead.houseianaUnitLink}
+            {lead.unitLink ? (
+              <a href={lead.unitLink} target="_blank" rel="noreferrer">
+                {lead.unitLink}
               </a>
             ) : (
               "-"

@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { translations } from "@/lib/translations";
 import { loadLanguage, saveLanguage } from "@/lib/storage";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-export default function LoginForm() {
+export default function LoginForm({ role }) {
   const router = useRouter();
   const [language, setLanguage] = useState("en");
   const [username, setUsername] = useState("");
@@ -36,6 +37,10 @@ export default function LoginForm() {
     saveLanguage(lang);
   };
 
+  const title = role === "admin" ? t.adminSignIn : t.salesSignIn;
+  const subtitle = role === "admin" ? t.adminSignInSub : t.salesSignInSub;
+  const accentClass = role === "admin" ? "login-accent-admin" : "login-accent-sales";
+
   const submit = async (e) => {
     e.preventDefault();
     setError("");
@@ -44,33 +49,34 @@ export default function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, expectedRole: role }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data?.error || t.invalidCredentials);
+        if (res.status === 403) setError(data?.error || t.notAllowedRole);
+        else setError(data?.error || t.invalidCredentials);
         setLoading(false);
         return;
       }
       router.replace(data.role === "admin" ? "/" : "/sales");
       router.refresh();
     } catch {
-      setError(t.invalidCredentials);
+      setError(t.networkError || t.invalidCredentials);
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-card">
+    <div className={`login-card ${accentClass}`}>
       <div className="login-header">
         <div className="brand">
-          <span className="brand-logo">H</span>
+          <span className="brand-logo">{role === "admin" ? "A" : "S"}</span>
           <span>{t.appTitle}</span>
         </div>
         <LanguageSwitcher language={language} onChange={onLanguageChange} />
       </div>
-      <h1 className="login-title">{t.signIn}</h1>
-      <p className="login-sub">{t.signInSub}</p>
+      <h1 className="login-title">{title}</h1>
+      <p className="login-sub">{subtitle}</p>
 
       <form onSubmit={submit} className="login-form">
         <div className="field">
@@ -102,9 +108,15 @@ export default function LoginForm() {
           style={{ width: "100%", justifyContent: "center" }}
           disabled={loading}
         >
-          {loading ? "..." : t.signIn}
+          {loading ? t.loading || "..." : t.signIn}
         </button>
       </form>
+
+      <div className="login-footer">
+        <Link href="/login" className="login-back-link">
+          ← {t.backToChooser}
+        </Link>
+      </div>
     </div>
   );
 }

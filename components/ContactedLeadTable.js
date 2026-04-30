@@ -23,7 +23,7 @@ export default function ContactedLeadTable({
             <th>{t.salesPhoneUsed}</th>
             <th>{t.salesWhatsAppUsed}</th>
             <th>{t.status}</th>
-            <th>{t.houseianaUnitLink}</th>
+            <th>{t.unitLink}</th>
             <th>{t.webLeadSourceLink}</th>
             <th style={{ width: 1, whiteSpace: "nowrap" }}>{t.actions}</th>
           </tr>
@@ -59,10 +59,10 @@ export default function ContactedLeadTable({
               <td data-label={t.status}>
                 <StatusBadge status={lead.status} t={t} />
               </td>
-              <td data-label={t.houseianaUnitLink}>
-                {lead.houseianaUnitLink ? (
+              <td data-label={t.unitLink}>
+                {lead.unitLink ? (
                   <a
-                    href={lead.houseianaUnitLink}
+                    href={lead.unitLink}
                     target="_blank"
                     rel="noreferrer"
                   >

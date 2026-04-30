@@ -1,13 +1,13 @@
-import LoginForm from "./login-form";
+import LoginChooser from "./login-chooser";
 
 export const metadata = {
-  title: "Login — Houseiana Leads",
+  title: "Sign In",
 };
 
 export default function LoginPage() {
   return (
     <div className="login-shell">
-      <LoginForm />
+      <LoginChooser />
     </div>
   );
 }

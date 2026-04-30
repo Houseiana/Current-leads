@@ -30,7 +30,7 @@ export async function PUT(req, { params }) {
        sales_phone_used = $8,
        sales_whatsapp_used = $9,
        status = $10,
-       houseiana_unit_link = $11,
+       unit_link = $11,
        web_lead_source_link = $12,
        updated_at = NOW()
      WHERE id = $13
@@ -46,7 +46,7 @@ export async function PUT(req, { params }) {
       body.salesPhoneUsed ? body.salesPhoneUsed.trim() : null,
       body.salesWhatsAppUsed ? body.salesWhatsAppUsed.trim() : null,
       body.status,
-      body.houseianaUnitLink ? body.houseianaUnitLink.trim() : null,
+      body.unitLink ? body.unitLink.trim() : null,
       body.webLeadSourceLink ? body.webLeadSourceLink.trim() : null,
       params.id,
     ]

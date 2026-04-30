@@ -15,7 +15,7 @@ const EMPTY = {
   salesPhoneUsed: "",
   salesWhatsAppUsed: "",
   status: "Called",
-  houseianaUnitLink: "",
+  unitLink: "",
   webLeadSourceLink: "",
 };
 
@@ -33,8 +33,8 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
     if (!form.salesName.trim()) e.salesName = t.requiredField;
     if (!form.status) e.status = t.requiredField;
     if (form.email && !isValidEmail(form.email)) e.email = t.invalidEmail;
-    if (form.houseianaUnitLink && !isValidUrl(form.houseianaUnitLink))
-      e.houseianaUnitLink = t.invalidUrl;
+    if (form.unitLink && !isValidUrl(form.unitLink))
+      e.unitLink = t.invalidUrl;
     if (form.webLeadSourceLink && !isValidUrl(form.webLeadSourceLink))
       e.webLeadSourceLink = t.invalidUrl;
     setErrors(e);
@@ -163,16 +163,16 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
           {errors.status && <span className="error">{errors.status}</span>}
         </div>
         <div className="field" style={{ gridColumn: "1 / -1" }}>
-          <label>{t.houseianaUnitLink}</label>
+          <label>{t.unitLink}</label>
           <input
             className="input"
             type="url"
             placeholder="https://..."
-            value={form.houseianaUnitLink}
-            onChange={(e) => setField("houseianaUnitLink", e.target.value)}
+            value={form.unitLink}
+            onChange={(e) => setField("unitLink", e.target.value)}
           />
-          {errors.houseianaUnitLink && (
-            <span className="error">{errors.houseianaUnitLink}</span>
+          {errors.unitLink && (
+            <span className="error">{errors.unitLink}</span>
           )}
         </div>
         <div className="field" style={{ gridColumn: "1 / -1" }}>

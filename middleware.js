@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const COOKIE_NAME = "houseiana_session";
+const COOKIE_NAME = "app_session";
+const LOGIN_PATHS = ["/login", "/login/admin", "/login/sales"];
 
 async function readSession(req) {
   const token = req.cookies.get(COOKIE_NAME)?.value;
@@ -24,7 +25,7 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
   const session = await readSession(req);
 
-  if (pathname === "/login") {
+  if (LOGIN_PATHS.includes(pathname)) {
     if (session) {
       const dest = session.role === "admin" ? "/" : "/sales";
       return NextResponse.redirect(new URL(dest, req.url));
@@ -33,8 +34,7 @@ export async function middleware(req) {
   }
 
   if (!session) {
-    const url = new URL("/login", req.url);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   if (pathname === "/" && session.role !== "admin") {
@@ -48,5 +48,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/", "/sales/:path*", "/login"],
+  matcher: ["/", "/sales/:path*", "/login", "/login/:path*"],
 };
