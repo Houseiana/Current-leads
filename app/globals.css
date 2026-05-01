@@ -507,6 +507,23 @@ button {
   background: var(--color-danger-soft);
   border-color: #fecaca;
 }
+.search-result.blacklisted {
+  background: #1f2937;
+  color: #fff;
+  border-color: #111827;
+}
+.search-result.blacklisted h3 {
+  color: #fef08a;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+}
+.search-result.blacklisted .detail-item .label {
+  color: #d1d5db;
+}
+.search-result.blacklisted .detail-item .value {
+  color: #fff;
+}
 .search-result h3 {
   margin: 0 0 8px;
   font-size: 14px;

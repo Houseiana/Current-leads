@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import GlobalPhoneSearch from "@/components/GlobalPhoneSearch";
 import FreshLeadsSection from "@/components/FreshLeadsSection";
 import ContactedLeadsSection from "@/components/ContactedLeadsSection";
+import BlacklistSection from "@/components/BlacklistSection";
 import ConvertFreshLeadModal from "@/components/ConvertFreshLeadModal";
 import Toast from "@/components/Toast";
 
@@ -32,6 +33,11 @@ async function jsonFetch(url, options = {}) {
 function localizeError(err, t) {
   if (err?.code === "PHONE_ALREADY_EXISTS") {
     const e = err.existing || {};
+    if (e.location === "blacklist") {
+      return t.errorAlreadyExistsBlacklist
+        .replace("{name}", e.name || "-")
+        .replace("{reason}", e.reason || "-");
+    }
     if (e.location === "contacted") {
       return t.errorAlreadyExistsContacted
         .replace("{name}", e.name || "-")
@@ -61,6 +67,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("fresh");
   const [freshLeads, setFreshLeads] = useState([]);
   const [contactedLeads, setContactedLeads] = useState([]);
+  const [blacklist, setBlacklist] = useState([]);
   const [convertingLead, setConvertingLead] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -80,14 +87,16 @@ export default function HomePage() {
 
   const loadAll = async () => {
     try {
-      const [me, fresh, contacted] = await Promise.all([
+      const [me, fresh, contacted, bl] = await Promise.all([
         jsonFetch("/api/auth/me"),
         jsonFetch("/api/fresh-leads"),
         jsonFetch("/api/contacted-leads"),
+        jsonFetch("/api/blacklist"),
       ]);
       setUser(me.user);
       setFreshLeads(fresh.leads || []);
       setContactedLeads(contacted.leads || []);
+      setBlacklist(bl.entries || []);
     } catch {
       // middleware will redirect to /login on auth failure
     }
@@ -183,6 +192,43 @@ export default function HomePage() {
     showToast(t.successDeleted);
   };
 
+  const handleAddBlacklist = async (data) => {
+    try {
+      const { entry } = await jsonFetch("/api/blacklist", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      setBlacklist((prev) => [entry, ...prev]);
+      showToast(t.successFreshAdded);
+    } catch (err) {
+      showError(err);
+      throw err;
+    }
+  };
+
+  const handleUpdateBlacklist = async (id, data) => {
+    try {
+      const { entry } = await jsonFetch(`/api/blacklist/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      setBlacklist((prev) => prev.map((e) => (e.id === id ? entry : e)));
+      showToast(t.successUpdated);
+    } catch (err) {
+      showError(err);
+      throw err;
+    }
+  };
+
+  const handleDeleteBlacklist = async (id, password) => {
+    await jsonFetch(`/api/blacklist/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ password }),
+    });
+    setBlacklist((prev) => prev.filter((e) => e.id !== id));
+    showToast(t.successDeleted);
+  };
+
   const handleConvertConfirm = async (extraData) => {
     if (!convertingLead) return;
     try {
@@ -226,9 +272,16 @@ export default function HomePage() {
           >
             {t.contactedLeads}
           </button>
+          <button
+            type="button"
+            className={`tab ${activeTab === "blacklist" ? "active" : ""}`}
+            onClick={() => setActiveTab("blacklist")}
+          >
+            {t.blacklist}
+          </button>
         </div>
 
-        {activeTab === "fresh" ? (
+        {activeTab === "fresh" && (
           <FreshLeadsSection
             t={t}
             language={language}
@@ -238,7 +291,8 @@ export default function HomePage() {
             onDelete={handleDeleteFresh}
             onConvert={(lead) => setConvertingLead(lead)}
           />
-        ) : (
+        )}
+        {activeTab === "contacted" && (
           <ContactedLeadsSection
             t={t}
             language={language}
@@ -246,6 +300,16 @@ export default function HomePage() {
             onAdd={handleAddContacted}
             onUpdate={handleUpdateContacted}
             onDelete={handleDeleteContacted}
+          />
+        )}
+        {activeTab === "blacklist" && (
+          <BlacklistSection
+            t={t}
+            language={language}
+            entries={blacklist}
+            onAdd={handleAddBlacklist}
+            onUpdate={handleUpdateBlacklist}
+            onDelete={handleDeleteBlacklist}
           />
         )}
       </main>

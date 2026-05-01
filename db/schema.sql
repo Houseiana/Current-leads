@@ -58,6 +58,21 @@ CREATE INDEX IF NOT EXISTS idx_contacted_leads_phone_norm
 CREATE INDEX IF NOT EXISTS idx_contacted_leads_created_at
   ON contacted_leads(created_at DESC);
 
+CREATE TABLE IF NOT EXISTS blacklist (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT,
+  phone TEXT NOT NULL,
+  phone_normalized TEXT NOT NULL,
+  reason TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_blacklist_phone_norm
+  ON blacklist(phone_normalized);
+CREATE INDEX IF NOT EXISTS idx_blacklist_created_at
+  ON blacklist(created_at DESC);
+
 -- Migrate from a previous schema version that named this column
 -- houseiana_unit_link. Idempotent.
 DO $$

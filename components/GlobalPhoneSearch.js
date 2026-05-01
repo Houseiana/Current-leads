@@ -77,6 +77,26 @@ export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
         </div>
       )}
 
+      {result && result.type === "blacklist" && (
+        <div className="search-result blacklisted">
+          <h3>{t.blacklistedDoNotContact}</h3>
+          <div className="detail-grid">
+            <div className="detail-item">
+              <div className="label">{t.name}</div>
+              <div className="value">{result.lead.name || "-"}</div>
+            </div>
+            <div className="detail-item">
+              <div className="label">{t.phone}</div>
+              <div className="value">{result.lead.phone || "-"}</div>
+            </div>
+            <div className="detail-item" style={{ gridColumn: "1 / -1" }}>
+              <div className="label">{t.reason}</div>
+              <div className="value">{result.lead.reason || "-"}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {result && result.type === "contacted" && (
         <div className="search-result found-contacted">
           <h3>{t.resultExisting}</h3>
