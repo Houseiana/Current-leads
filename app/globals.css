@@ -373,6 +373,21 @@ button {
   color: #4b5563;
   border-color: #d1d5db;
 }
+.badge.noanswer {
+  background: #fff7ed;
+  color: #9a3412;
+  border-color: #fed7aa;
+}
+.badge.phoneoff {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+.badge.whatsapp {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
+}
 
 .form-grid {
   display: grid;

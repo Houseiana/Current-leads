@@ -46,8 +46,9 @@ export async function PUT(req, { params }) {
        web_lead_source_link = $12,
        lead_type = $13,
        notes = $14,
+       call_at = $15,
        updated_at = NOW()
-     WHERE id = $15
+     WHERE id = $16
      RETURNING *`,
     [
       (body.name || "").trim(),
@@ -64,6 +65,7 @@ export async function PUT(req, { params }) {
       body.webLeadSourceLink ? body.webLeadSourceLink.trim() : null,
       body.leadType ? body.leadType.trim() : null,
       body.notes ? body.notes.toString().trim() : null,
+      body.callAt || null,
       params.id,
     ]
   );

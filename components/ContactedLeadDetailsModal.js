@@ -98,6 +98,12 @@ export default function ContactedLeadDetailsModal({
           <div className="value">{formatDate(lead.updatedAt, language)}</div>
         </div>
         <div className="detail-item">
+          <div className="label">{t.callAt}</div>
+          <div className="value">
+            {lead.callAt ? formatDate(lead.callAt, language) : "-"}
+          </div>
+        </div>
+        <div className="detail-item">
           <div className="label">{t.contactedAt}</div>
           <div className="value">{formatDate(lead.contactedAt, language)}</div>
         </div>

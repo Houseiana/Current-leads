@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import Modal from "./Modal";
-import { isValidEmail, isValidUrl } from "@/lib/utils";
+import {
+  datetimeLocalToIso,
+  isValidEmail,
+  isValidUrl,
+} from "@/lib/utils";
 import {
   LEAD_TYPE_OPTIONS,
   SALES_NAMES,
@@ -20,6 +24,7 @@ export default function ConvertFreshLeadModal({ t, lead, onConfirm, onCancel }) 
     unitLink: "",
     leadType: lead?.leadType || "",
     notes: "",
+    callAt: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -44,6 +49,7 @@ export default function ConvertFreshLeadModal({ t, lead, onConfirm, onCancel }) 
     Object.keys(form).forEach((k) => {
       trimmed[k] = typeof form[k] === "string" ? form[k].trim() : form[k];
     });
+    trimmed.callAt = datetimeLocalToIso(form.callAt);
     onConfirm(trimmed);
   };
 
@@ -180,6 +186,15 @@ export default function ConvertFreshLeadModal({ t, lead, onConfirm, onCancel }) 
               </option>
             ))}
           </select>
+        </div>
+        <div className="field">
+          <label>{t.callAt}</label>
+          <input
+            className="input"
+            type="datetime-local"
+            value={form.callAt}
+            onChange={(e) => setField("callAt", e.target.value)}
+          />
         </div>
         <div className="field" style={{ gridColumn: "1 / -1" }}>
           <label>{t.unitLink}</label>

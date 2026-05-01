@@ -43,6 +43,9 @@ export default function ContactedLeadsSection({
     const counts = {
       total: leads.length,
       Called: 0,
+      "No Answer": 0,
+      "Phone Off": 0,
+      "Sent on WhatsApp": 0,
       "Follow Ups": 0,
       "Sent Unit": 0,
       "List His Unit": 0,
@@ -95,6 +98,9 @@ export default function ContactedLeadsSection({
         items={[
           { label: t.totalContactedLeads, value: stats.total, accent: true },
           { label: t.statusCalled, value: stats.Called },
+          { label: t.statusNoAnswer, value: stats["No Answer"] },
+          { label: t.statusPhoneOff, value: stats["Phone Off"] },
+          { label: t.statusSentWhatsApp, value: stats["Sent on WhatsApp"] },
           { label: t.statusFollowUps, value: stats["Follow Ups"] },
           { label: t.statusSentUnit, value: stats["Sent Unit"] },
           { label: t.statusListUnit, value: stats["List His Unit"] },

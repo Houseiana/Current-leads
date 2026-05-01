@@ -48,11 +48,11 @@ export async function POST(req) {
     `INSERT INTO contacted_leads (
        name, phone, phone_normalized, email, area, unit,
        sales_name, sales_phone_used, sales_whatsapp_used,
-       status, unit_link, web_lead_source_link, lead_type, notes
+       status, unit_link, web_lead_source_link, lead_type, notes, call_at
      ) VALUES (
        $1, $2, $3, $4, $5, $6,
        $7, $8, $9,
-       $10, $11, $12, $13, $14
+       $10, $11, $12, $13, $14, $15
      ) RETURNING *`,
     [
       body.name.trim(),
@@ -69,6 +69,7 @@ export async function POST(req) {
       body.webLeadSourceLink ? body.webLeadSourceLink.trim() : null,
       body.leadType ? body.leadType.trim() : null,
       body.notes ? body.notes.toString().trim() : null,
+      body.callAt || null,
     ]
   );
   return NextResponse.json({ lead: toContactedLead(rows[0]) }, { status: 201 });

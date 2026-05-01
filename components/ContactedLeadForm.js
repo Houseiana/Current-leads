@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import Modal from "./Modal";
-import { isValidEmail, isValidUrl } from "@/lib/utils";
+import {
+  datetimeLocalToIso,
+  isoToDatetimeLocal,
+  isValidEmail,
+  isValidUrl,
+} from "@/lib/utils";
 import {
   LEAD_TYPE_OPTIONS,
   SALES_NAMES,
@@ -23,10 +28,15 @@ const EMPTY = {
   webLeadSourceLink: "",
   leadType: "",
   notes: "",
+  callAt: "",
 };
 
 export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
-  const [form, setForm] = useState({ ...EMPTY, ...(initial || {}) });
+  const [form, setForm] = useState(() => ({
+    ...EMPTY,
+    ...(initial || {}),
+    callAt: isoToDatetimeLocal(initial?.callAt),
+  }));
   const [errors, setErrors] = useState({});
 
   const setField = (key, value) =>
@@ -54,6 +64,7 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
     Object.keys(form).forEach((k) => {
       trimmed[k] = typeof form[k] === "string" ? form[k].trim() : form[k];
     });
+    trimmed.callAt = datetimeLocalToIso(form.callAt);
     onSubmit(trimmed);
   };
 
@@ -189,6 +200,15 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
               </option>
             ))}
           </select>
+        </div>
+        <div className="field">
+          <label>{t.callAt}</label>
+          <input
+            className="input"
+            type="datetime-local"
+            value={form.callAt}
+            onChange={(e) => setField("callAt", e.target.value)}
+          />
         </div>
         <div className="field" style={{ gridColumn: "1 / -1" }}>
           <label>{t.unitLink}</label>
