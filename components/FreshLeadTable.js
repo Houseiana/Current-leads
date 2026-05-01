@@ -82,10 +82,11 @@ export default function FreshLeadTable({
                   <button
                     type="button"
                     className="btn btn-sm btn-primary"
+                    style={{ whiteSpace: "nowrap" }}
                     onClick={() => onConvert(lead)}
                     title={t.transferToContacted}
                   >
-                    → {t.transferToContacted}
+                    → {t.transferShort}
                   </button>
                   <button
                     type="button"
