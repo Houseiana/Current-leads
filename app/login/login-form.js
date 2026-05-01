@@ -53,8 +53,13 @@ export default function LoginForm({ role }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        if (res.status === 403) setError(data?.error || t.notAllowedRole);
-        else setError(data?.error || t.invalidCredentials);
+        const fallback =
+          res.status === 403
+            ? t.notAllowedRole
+            : res.status === 401
+            ? t.invalidCredentials
+            : `Server error (${res.status})`;
+        setError(data?.error ? `${data.error} (${res.status})` : fallback);
         setLoading(false);
         return;
       }
