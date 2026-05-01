@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import {
+  checkActionPassword,
   duplicatePhoneResponse,
   findDuplicatePhone,
   requireDeletePassword,
@@ -21,6 +22,9 @@ export async function PUT(req, { params }) {
   } catch {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
+
+  const pw = checkActionPassword(body?.password);
+  if (pw.error) return pw.error;
 
   const phone = (body.phone || "").trim();
   const phoneNorm = normalizePhone(phone);

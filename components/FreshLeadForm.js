@@ -16,8 +16,12 @@ const EMPTY = {
 };
 
 export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
+  const isEdit = !!initial;
   const [form, setForm] = useState({ ...EMPTY, ...(initial || {}) });
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const setField = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -32,39 +36,58 @@ export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
     if (!form.leadSource.trim()) e.leadSource = t.requiredField;
     if (form.leadSourceLink && !isValidUrl(form.leadSourceLink))
       e.leadSourceLink = t.invalidUrl;
+    if (isEdit && !password) e.password = t.requiredField;
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError("");
     if (!validate()) return;
-    onSubmit({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      area: form.area.trim(),
-      projectName: form.projectName.trim(),
-      leadSource: form.leadSource.trim(),
-      leadSourceLink: form.leadSourceLink.trim(),
-      leadType: form.leadType,
-    });
+    setSubmitting(true);
+    try {
+      await onSubmit({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        area: form.area.trim(),
+        projectName: form.projectName.trim(),
+        leadSource: form.leadSource.trim(),
+        leadSourceLink: form.leadSourceLink.trim(),
+        leadType: form.leadType,
+        ...(isEdit ? { password } : {}),
+      });
+    } catch (err) {
+      if (err?.code === "WRONG_PASSWORD" || err?.status === 401) {
+        setSubmitError(t.wrongDeletePassword);
+      } else {
+        setSubmitError(err?.message || t.networkError);
+      }
+      setSubmitting(false);
+    }
   };
 
   return (
     <Modal
       title={initial ? t.edit : t.addFreshLead}
-      onClose={onCancel}
+      onClose={submitting ? undefined : onCancel}
       footer={
         <>
-          <button type="button" className="btn" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn"
+            onClick={onCancel}
+            disabled={submitting}
+          >
             {t.cancel}
           </button>
           <button
             type="button"
             className="btn btn-primary"
             onClick={handleSubmit}
+            disabled={submitting}
           >
-            {t.save}
+            {submitting ? t.loading || "..." : t.save}
           </button>
         </>
       }
@@ -149,6 +172,30 @@ export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
             <span className="error">{errors.leadSourceLink}</span>
           )}
         </div>
+        {isEdit && (
+          <div className="field" style={{ gridColumn: "1 / -1" }}>
+            <label>{t.editPasswordLabel} *</label>
+            <input
+              className="input"
+              type="password"
+              placeholder={t.editPasswordPrompt}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="off"
+            />
+            {errors.password && (
+              <span className="error">{errors.password}</span>
+            )}
+          </div>
+        )}
+        {submitError && (
+          <div
+            className="login-error"
+            style={{ gridColumn: "1 / -1", marginTop: 4 }}
+          >
+            {submitError}
+          </div>
+        )}
       </form>
     </Modal>
   );

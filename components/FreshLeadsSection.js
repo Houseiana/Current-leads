@@ -129,9 +129,9 @@ export default function FreshLeadsSection({
             setShowForm(false);
             setEditing(null);
           }}
-          onSubmit={(data) => {
-            if (editing) onUpdate(editing.id, data);
-            else onAdd(data);
+          onSubmit={async (data) => {
+            if (editing) await onUpdate(editing.id, data);
+            else await onAdd(data);
             setShowForm(false);
             setEditing(null);
           }}

@@ -119,6 +119,7 @@ export default function HomePage() {
       showToast(t.successFreshAdded);
     } catch (err) {
       showError(err);
+      throw err;
     }
   };
 
@@ -132,6 +133,7 @@ export default function HomePage() {
       showToast(t.successUpdated);
     } catch (err) {
       showError(err);
+      throw err;
     }
   };
 
@@ -154,6 +156,7 @@ export default function HomePage() {
       showToast(t.successContactedAdded);
     } catch (err) {
       showError(err);
+      throw err;
     }
   };
 
@@ -167,6 +170,7 @@ export default function HomePage() {
       showToast(t.successUpdated);
     } catch (err) {
       showError(err);
+      throw err;
     }
   };
 

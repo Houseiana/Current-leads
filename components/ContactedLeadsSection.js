@@ -8,7 +8,7 @@ import ContactedLeadTable from "./ContactedLeadTable";
 import ContactedLeadDetailsModal from "./ContactedLeadDetailsModal";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { uniqueValues } from "@/lib/utils";
-import { STATUS_OPTIONS } from "@/lib/translations";
+import { SALES_NAMES, STATUS_OPTIONS } from "@/lib/translations";
 
 export default function ContactedLeadsSection({
   t,
@@ -69,10 +69,7 @@ export default function ContactedLeadsSection({
     {
       key: "salesName",
       label: t.filterBySales,
-      options: uniqueValues(leads, "salesName").map((v) => ({
-        value: v,
-        label: v,
-      })),
+      options: SALES_NAMES.map((v) => ({ value: v, label: v })),
     },
     {
       key: "area",
@@ -155,9 +152,9 @@ export default function ContactedLeadsSection({
             setShowForm(false);
             setEditing(null);
           }}
-          onSubmit={(data) => {
-            if (editing) onUpdate(editing.id, data);
-            else onAdd(data);
+          onSubmit={async (data) => {
+            if (editing) await onUpdate(editing.id, data);
+            else await onAdd(data);
             setShowForm(false);
             setEditing(null);
           }}
