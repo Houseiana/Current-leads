@@ -80,8 +80,9 @@ export default function FreshLeadTable({
                     type="button"
                     className="btn btn-sm btn-primary"
                     onClick={() => onConvert(lead)}
+                    title={t.transferToContacted}
                   >
-                    {t.markAsContacted}
+                    → {t.transferToContacted}
                   </button>
                   <button
                     type="button"

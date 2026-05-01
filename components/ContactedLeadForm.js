@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { isValidEmail, isValidUrl } from "@/lib/utils";
-import { STATUS_OPTIONS } from "@/lib/translations";
+import { SALES_NAMES, STATUS_OPTIONS } from "@/lib/translations";
 
 const EMPTY = {
   name: "",
@@ -119,11 +119,18 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
         </div>
         <div className="field">
           <label>{t.salesName} *</label>
-          <input
-            className="input"
+          <select
+            className="select"
             value={form.salesName}
             onChange={(e) => setField("salesName", e.target.value)}
-          />
+          >
+            <option value="">{t.selectSales}</option>
+            {SALES_NAMES.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
           {errors.salesName && (
             <span className="error">{errors.salesName}</span>
           )}
