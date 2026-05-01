@@ -171,8 +171,8 @@ export default function ContactedLeadsSection({
         <ConfirmDeleteModal
           t={t}
           onCancel={() => setDeleting(null)}
-          onConfirm={() => {
-            onDelete(deleting.id);
+          onConfirm={async (password) => {
+            await onDelete(deleting.id, password);
             setDeleting(null);
           }}
         />

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { requireRole } from "@/lib/api-helpers";
+import { requireDeletePassword, requireRole } from "@/lib/api-helpers";
 import { toFreshLead } from "@/lib/serializers";
 import { normalizePhone } from "@/lib/utils";
 
@@ -76,9 +76,11 @@ export async function PUT(req, { params }) {
   return NextResponse.json({ lead: toFreshLead(rows[0]) });
 }
 
-export async function DELETE(_req, { params }) {
+export async function DELETE(req, { params }) {
   const auth = await requireRole("admin");
   if (auth.error) return auth.error;
+  const pw = await requireDeletePassword(req);
+  if (pw.error) return pw.error;
   const { rowCount } = await query("DELETE FROM fresh_leads WHERE id = $1", [
     params.id,
   ]);

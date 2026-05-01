@@ -121,14 +121,13 @@ export default function HomePage() {
     }
   };
 
-  const handleDeleteFresh = async (id) => {
-    try {
-      await jsonFetch(`/api/fresh-leads/${id}`, { method: "DELETE" });
-      setFreshLeads((prev) => prev.filter((l) => l.id !== id));
-      showToast(t.successDeleted);
-    } catch (err) {
-      showError(err);
-    }
+  const handleDeleteFresh = async (id, password) => {
+    await jsonFetch(`/api/fresh-leads/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ password }),
+    });
+    setFreshLeads((prev) => prev.filter((l) => l.id !== id));
+    showToast(t.successDeleted);
   };
 
   const handleAddContacted = async (data) => {
@@ -157,14 +156,13 @@ export default function HomePage() {
     }
   };
 
-  const handleDeleteContacted = async (id) => {
-    try {
-      await jsonFetch(`/api/contacted-leads/${id}`, { method: "DELETE" });
-      setContactedLeads((prev) => prev.filter((l) => l.id !== id));
-      showToast(t.successDeleted);
-    } catch (err) {
-      showError(err);
-    }
+  const handleDeleteContacted = async (id, password) => {
+    await jsonFetch(`/api/contacted-leads/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ password }),
+    });
+    setContactedLeads((prev) => prev.filter((l) => l.id !== id));
+    showToast(t.successDeleted);
   };
 
   const handleConvertConfirm = async (extraData) => {
