@@ -1,29 +1,28 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { bootstrapStatus, ensureBootstrapped } from "@/lib/bootstrap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const result = {
-    env: {
-      DATABASE_URL: !!process.env.DATABASE_URL,
-      SESSION_SECRET: !!process.env.SESSION_SECRET,
-    },
-    db: { connected: false, usersTable: false, userCount: 0 },
-  };
-  try {
-    const tables = await query(
-      `SELECT to_regclass('public.users') AS t`
-    );
-    result.db.connected = true;
-    result.db.usersTable = !!tables.rows[0]?.t;
-    if (result.db.usersTable) {
-      const c = await query("SELECT COUNT(*)::int AS c FROM users");
-      result.db.userCount = c.rows[0]?.c || 0;
+export async function GET(req) {
+  const url = new URL(req.url);
+  const shouldBootstrap = url.searchParams.get("bootstrap") === "1";
+
+  if (shouldBootstrap) {
+    try {
+      const result = await ensureBootstrapped();
+      return NextResponse.json({
+        bootstrapped: true,
+        seeded: result.seeded,
+        ...(await bootstrapStatus()),
+      });
+    } catch (err) {
+      return NextResponse.json(
+        { error: err.message, ...(await bootstrapStatus()) },
+        { status: 500 }
+      );
     }
-  } catch (err) {
-    result.db.error = err.message;
   }
-  return NextResponse.json(result);
+
+  return NextResponse.json(await bootstrapStatus());
 }

@@ -49,3 +49,18 @@ CREATE INDEX IF NOT EXISTS idx_contacted_leads_phone_norm
   ON contacted_leads(phone_normalized);
 CREATE INDEX IF NOT EXISTS idx_contacted_leads_created_at
   ON contacted_leads(created_at DESC);
+
+-- Migrate from a previous schema version that named this column
+-- houseiana_unit_link. Idempotent.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'contacted_leads' AND column_name = 'houseiana_unit_link'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'contacted_leads' AND column_name = 'unit_link'
+  ) THEN
+    ALTER TABLE contacted_leads RENAME COLUMN houseiana_unit_link TO unit_link;
+  END IF;
+END $$;
