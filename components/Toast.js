@@ -1,5 +1,5 @@
 "use client";
 
-export default function Toast({ message }) {
-  return <div className="toast success">{message}</div>;
+export default function Toast({ message, variant = "success" }) {
+  return <div className={`toast ${variant}`}>{message}</div>;
 }

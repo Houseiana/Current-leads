@@ -22,9 +22,23 @@ async function jsonFetch(url, options = {}) {
   if (!res.ok) {
     const err = new Error(data?.error || "Request failed");
     err.status = res.status;
+    err.code = data?.code;
+    err.existing = data?.existing;
     throw err;
   }
   return data;
+}
+
+function localizeError(err, t) {
+  if (err?.code === "PHONE_EXISTS_IN_CONTACTED") {
+    if (err.existing?.salesName && err.existing?.status) {
+      return t.errorPhoneInContactedWith
+        .replace("{sales}", err.existing.salesName)
+        .replace("{status}", err.existing.status);
+    }
+    return t.errorPhoneInContacted;
+  }
+  return err?.message || t.networkError;
 }
 
 export default function HomePage() {
@@ -74,10 +88,12 @@ export default function HomePage() {
     saveLanguage(lang);
   };
 
-  const showToast = (message) => {
-    setToast({ message, id: Date.now() });
-    setTimeout(() => setToast(null), 2800);
+  const showToast = (message, variant = "success") => {
+    setToast({ message, variant, id: Date.now() });
+    setTimeout(() => setToast(null), 4000);
   };
+
+  const showError = (err) => showToast(localizeError(err, t), "error");
 
   const handleAddFresh = async (data) => {
     try {
@@ -88,7 +104,7 @@ export default function HomePage() {
       setFreshLeads((prev) => [lead, ...prev]);
       showToast(t.successFreshAdded);
     } catch (err) {
-      showToast(err.message || t.networkError);
+      showError(err);
     }
   };
 
@@ -101,7 +117,7 @@ export default function HomePage() {
       setFreshLeads((prev) => prev.map((l) => (l.id === id ? lead : l)));
       showToast(t.successUpdated);
     } catch (err) {
-      showToast(err.message || t.networkError);
+      showError(err);
     }
   };
 
@@ -111,7 +127,7 @@ export default function HomePage() {
       setFreshLeads((prev) => prev.filter((l) => l.id !== id));
       showToast(t.successDeleted);
     } catch (err) {
-      showToast(err.message || t.networkError);
+      showError(err);
     }
   };
 
@@ -124,7 +140,7 @@ export default function HomePage() {
       setContactedLeads((prev) => [lead, ...prev]);
       showToast(t.successContactedAdded);
     } catch (err) {
-      showToast(err.message || t.networkError);
+      showError(err);
     }
   };
 
@@ -137,7 +153,7 @@ export default function HomePage() {
       setContactedLeads((prev) => prev.map((l) => (l.id === id ? lead : l)));
       showToast(t.successUpdated);
     } catch (err) {
-      showToast(err.message || t.networkError);
+      showError(err);
     }
   };
 
@@ -147,7 +163,7 @@ export default function HomePage() {
       setContactedLeads((prev) => prev.filter((l) => l.id !== id));
       showToast(t.successDeleted);
     } catch (err) {
-      showToast(err.message || t.networkError);
+      showError(err);
     }
   };
 
@@ -164,7 +180,7 @@ export default function HomePage() {
       setActiveTab("contacted");
       showToast(t.successConverted);
     } catch (err) {
-      showToast(err.message || t.networkError);
+      showError(err);
     }
   };
 
@@ -227,7 +243,13 @@ export default function HomePage() {
         />
       )}
 
-      {toast && <Toast key={toast.id} message={toast.message} />}
+      {toast && (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          variant={toast.variant}
+        />
+      )}
     </div>
   );
 }

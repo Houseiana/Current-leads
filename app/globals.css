@@ -454,6 +454,9 @@ button {
 .toast.success {
   background: var(--color-success);
 }
+.toast.error {
+  background: var(--color-danger);
+}
 
 .search-result {
   margin-top: 12px;
