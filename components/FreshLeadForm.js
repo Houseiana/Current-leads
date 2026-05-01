@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { isValidUrl } from "@/lib/utils";
+import { LEAD_TYPE_OPTIONS } from "@/lib/translations";
 
 const EMPTY = {
   name: "",
@@ -11,6 +12,7 @@ const EMPTY = {
   projectName: "",
   leadSource: "",
   leadSourceLink: "",
+  leadType: "",
 };
 
 export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
@@ -44,6 +46,7 @@ export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
       projectName: form.projectName.trim(),
       leadSource: form.leadSource.trim(),
       leadSourceLink: form.leadSourceLink.trim(),
+      leadType: form.leadType,
     });
   };
 
@@ -117,6 +120,21 @@ export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
           {errors.leadSource && (
             <span className="error">{errors.leadSource}</span>
           )}
+        </div>
+        <div className="field">
+          <label>{t.leadType}</label>
+          <select
+            className="select"
+            value={form.leadType}
+            onChange={(e) => setField("leadType", e.target.value)}
+          >
+            <option value="">{t.selectLeadType}</option>
+            {LEAD_TYPE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {t[o.labelKey]}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="field" style={{ gridColumn: "1 / -1" }}>
           <label>{t.leadSourceLink}</label>

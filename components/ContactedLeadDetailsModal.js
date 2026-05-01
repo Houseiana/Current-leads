@@ -3,6 +3,7 @@
 import Modal from "./Modal";
 import StatusBadge from "./StatusBadge";
 import { formatDate } from "@/lib/utils";
+import { leadTypeLabel } from "@/lib/translations";
 
 export default function ContactedLeadDetailsModal({
   t,
@@ -59,6 +60,10 @@ export default function ContactedLeadDetailsModal({
           <div className="value">
             <StatusBadge status={lead.status} t={t} />
           </div>
+        </div>
+        <div className="detail-item">
+          <div className="label">{t.leadType}</div>
+          <div className="value">{leadTypeLabel(lead.leadType, t)}</div>
         </div>
         <div className="detail-item">
           <div className="label">{t.unitLink}</div>

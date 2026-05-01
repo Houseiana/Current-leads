@@ -3,6 +3,7 @@
 import { useState } from "react";
 import StatusBadge from "./StatusBadge";
 import { formatDate } from "@/lib/utils";
+import { leadTypeLabel } from "@/lib/translations";
 
 export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
   const [query, setQuery] = useState("");
@@ -183,6 +184,12 @@ export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
             <div className="detail-item">
               <div className="label">{t.leadSource}</div>
               <div className="value">{result.lead.leadSource || "-"}</div>
+            </div>
+            <div className="detail-item">
+              <div className="label">{t.leadType}</div>
+              <div className="value">
+                {leadTypeLabel(result.lead.leadType, t)}
+              </div>
             </div>
             <div className="detail-item">
               <div className="label">{t.leadSourceLink}</div>

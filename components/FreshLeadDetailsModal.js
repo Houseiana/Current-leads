@@ -2,6 +2,7 @@
 
 import Modal from "./Modal";
 import { formatDate } from "@/lib/utils";
+import { leadTypeLabel } from "@/lib/translations";
 
 export default function FreshLeadDetailsModal({ t, language, lead, onClose }) {
   if (!lead) return null;
@@ -35,6 +36,10 @@ export default function FreshLeadDetailsModal({ t, language, lead, onClose }) {
         <div className="detail-item">
           <div className="label">{t.leadSource}</div>
           <div className="value">{lead.leadSource || "-"}</div>
+        </div>
+        <div className="detail-item">
+          <div className="label">{t.leadType}</div>
+          <div className="value">{leadTypeLabel(lead.leadType, t)}</div>
         </div>
         <div className="detail-item">
           <div className="label">{t.leadSourceLink}</div>

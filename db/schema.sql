@@ -17,9 +17,11 @@ CREATE TABLE IF NOT EXISTS fresh_leads (
   project_name TEXT NOT NULL,
   lead_source TEXT NOT NULL,
   lead_source_link TEXT,
+  lead_type TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE fresh_leads ADD COLUMN IF NOT EXISTS lead_type TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_fresh_leads_phone_norm
   ON fresh_leads(phone_normalized);
@@ -40,10 +42,12 @@ CREATE TABLE IF NOT EXISTS contacted_leads (
   status TEXT NOT NULL DEFAULT 'Called',
   unit_link TEXT,
   web_lead_source_link TEXT,
+  lead_type TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   contacted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE contacted_leads ADD COLUMN IF NOT EXISTS lead_type TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_contacted_leads_phone_norm
   ON contacted_leads(phone_normalized);

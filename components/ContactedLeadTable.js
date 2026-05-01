@@ -1,6 +1,7 @@
 "use client";
 
 import StatusBadge from "./StatusBadge";
+import { leadTypeLabel } from "@/lib/translations";
 
 export default function ContactedLeadTable({
   t,
@@ -23,6 +24,7 @@ export default function ContactedLeadTable({
             <th>{t.salesPhoneUsed}</th>
             <th>{t.salesWhatsAppUsed}</th>
             <th>{t.status}</th>
+            <th>{t.leadType}</th>
             <th>{t.unitLink}</th>
             <th>{t.webLeadSourceLink}</th>
             <th style={{ width: 1, whiteSpace: "nowrap" }}>{t.actions}</th>
@@ -31,7 +33,7 @@ export default function ContactedLeadTable({
         <tbody>
           {leads.length === 0 && (
             <tr className="empty-row">
-              <td colSpan={12}>{t.noLeads}</td>
+              <td colSpan={13}>{t.noLeads}</td>
             </tr>
           )}
           {leads.map((lead) => (
@@ -59,6 +61,7 @@ export default function ContactedLeadTable({
               <td data-label={t.status}>
                 <StatusBadge status={lead.status} t={t} />
               </td>
+              <td data-label={t.leadType}>{leadTypeLabel(lead.leadType, t)}</td>
               <td data-label={t.unitLink}>
                 {lead.unitLink ? (
                   <a

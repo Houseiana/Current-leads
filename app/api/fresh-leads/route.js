@@ -65,8 +65,8 @@ export async function POST(req) {
 
   const { rows } = await query(
     `INSERT INTO fresh_leads
-      (name, phone, phone_normalized, area, project_name, lead_source, lead_source_link)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (name, phone, phone_normalized, area, project_name, lead_source, lead_source_link, lead_type)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING *`,
     [
       body.name.trim(),
@@ -76,6 +76,7 @@ export async function POST(req) {
       body.projectName.trim(),
       body.leadSource.trim(),
       body.leadSourceLink ? body.leadSourceLink.trim() : null,
+      body.leadType ? body.leadType.trim() : null,
     ]
   );
   return NextResponse.json({ lead: toFreshLead(rows[0]) }, { status: 201 });

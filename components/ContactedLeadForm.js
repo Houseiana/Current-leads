@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { isValidEmail, isValidUrl } from "@/lib/utils";
-import { SALES_NAMES, STATUS_OPTIONS } from "@/lib/translations";
+import {
+  LEAD_TYPE_OPTIONS,
+  SALES_NAMES,
+  STATUS_OPTIONS,
+} from "@/lib/translations";
 
 const EMPTY = {
   name: "",
@@ -17,6 +21,7 @@ const EMPTY = {
   status: "Called",
   unitLink: "",
   webLeadSourceLink: "",
+  leadType: "",
 };
 
 export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
@@ -168,6 +173,21 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
             ))}
           </select>
           {errors.status && <span className="error">{errors.status}</span>}
+        </div>
+        <div className="field">
+          <label>{t.leadType}</label>
+          <select
+            className="select"
+            value={form.leadType}
+            onChange={(e) => setField("leadType", e.target.value)}
+          >
+            <option value="">{t.selectLeadType}</option>
+            {LEAD_TYPE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {t[o.labelKey]}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="field" style={{ gridColumn: "1 / -1" }}>
           <label>{t.unitLink}</label>

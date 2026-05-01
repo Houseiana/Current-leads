@@ -54,8 +54,9 @@ export async function PUT(req, { params }) {
        project_name = $5,
        lead_source = $6,
        lead_source_link = $7,
+       lead_type = $8,
        updated_at = NOW()
-     WHERE id = $8
+     WHERE id = $9
      RETURNING *`,
     [
       (body.name || "").trim(),
@@ -65,6 +66,7 @@ export async function PUT(req, { params }) {
       (body.projectName || "").trim(),
       (body.leadSource || "").trim(),
       body.leadSourceLink ? body.leadSourceLink.trim() : null,
+      body.leadType ? body.leadType.trim() : null,
       params.id,
     ]
   );

@@ -44,13 +44,13 @@ export async function POST(req, { params }) {
         `INSERT INTO contacted_leads (
            name, phone, phone_normalized, email, area, unit,
            sales_name, sales_phone_used, sales_whatsapp_used,
-           status, unit_link, web_lead_source_link,
+           status, unit_link, web_lead_source_link, lead_type,
            created_at, updated_at, contacted_at
          ) VALUES (
            $1, $2, $3, $4, $5, $6,
            $7, $8, $9,
-           $10, $11, $12,
-           $13, NOW(), NOW()
+           $10, $11, $12, $13,
+           $14, NOW(), NOW()
          ) RETURNING *`,
         [
           f.name,
@@ -65,6 +65,7 @@ export async function POST(req, { params }) {
           body.status,
           body.unitLink ? body.unitLink.trim() : null,
           f.lead_source_link,
+          body.leadType ? body.leadType.trim() : f.lead_type,
           f.created_at,
         ]
       );
