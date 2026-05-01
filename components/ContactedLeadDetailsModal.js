@@ -102,6 +102,24 @@ export default function ContactedLeadDetailsModal({
           <div className="value">{formatDate(lead.contactedAt, language)}</div>
         </div>
       </div>
+
+      <div style={{ marginTop: 18 }}>
+        <div
+          style={{
+            color: "var(--color-muted)",
+            fontSize: 11,
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            marginBottom: 6,
+            fontWeight: 600,
+          }}
+        >
+          {t.notes}
+        </div>
+        <div className="notes-block">
+          {lead.notes ? lead.notes : <em style={{ color: "var(--color-muted)" }}>{t.noNotes}</em>}
+        </div>
+      </div>
     </Modal>
   );
 }

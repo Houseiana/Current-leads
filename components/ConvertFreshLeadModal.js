@@ -19,6 +19,7 @@ export default function ConvertFreshLeadModal({ t, lead, onConfirm, onCancel }) 
     status: "Called",
     unitLink: "",
     leadType: lead?.leadType || "",
+    notes: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -192,6 +193,16 @@ export default function ConvertFreshLeadModal({ t, lead, onConfirm, onCancel }) 
           {errors.unitLink && (
             <span className="error">{errors.unitLink}</span>
           )}
+        </div>
+        <div className="field" style={{ gridColumn: "1 / -1" }}>
+          <label>{t.notes}</label>
+          <textarea
+            className="textarea"
+            rows={5}
+            placeholder={t.notesPlaceholder}
+            value={form.notes}
+            onChange={(e) => setField("notes", e.target.value)}
+          />
         </div>
       </form>
     </Modal>

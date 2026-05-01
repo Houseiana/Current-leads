@@ -22,6 +22,7 @@ const EMPTY = {
   unitLink: "",
   webLeadSourceLink: "",
   leadType: "",
+  notes: "",
 };
 
 export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
@@ -214,6 +215,16 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
           {errors.webLeadSourceLink && (
             <span className="error">{errors.webLeadSourceLink}</span>
           )}
+        </div>
+        <div className="field" style={{ gridColumn: "1 / -1" }}>
+          <label>{t.notes}</label>
+          <textarea
+            className="textarea"
+            rows={5}
+            placeholder={t.notesPlaceholder}
+            value={form.notes}
+            onChange={(e) => setField("notes", e.target.value)}
+          />
         </div>
       </form>
     </Modal>

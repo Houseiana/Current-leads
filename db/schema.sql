@@ -43,11 +43,13 @@ CREATE TABLE IF NOT EXISTS contacted_leads (
   unit_link TEXT,
   web_lead_source_link TEXT,
   lead_type TEXT,
+  notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   contacted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE contacted_leads ADD COLUMN IF NOT EXISTS lead_type TEXT;
+ALTER TABLE contacted_leads ADD COLUMN IF NOT EXISTS notes TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_contacted_leads_phone_norm
   ON contacted_leads(phone_normalized);
