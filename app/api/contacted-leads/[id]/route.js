@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { requireDeletePassword, requireRole } from "@/lib/api-helpers";
+import {
+  duplicatePhoneResponse,
+  findDuplicatePhone,
+  requireDeletePassword,
+  requireRole,
+} from "@/lib/api-helpers";
 import { toContactedLead } from "@/lib/serializers";
 import { normalizePhone } from "@/lib/utils";
 
@@ -18,6 +23,13 @@ export async function PUT(req, { params }) {
   }
 
   const phone = (body.phone || "").trim();
+  const phoneNorm = normalizePhone(phone);
+
+  const existing = await findDuplicatePhone(phoneNorm, {
+    excludeContactedId: params.id,
+  });
+  if (existing) return duplicatePhoneResponse(existing);
+
   const { rows } = await query(
     `UPDATE contacted_leads SET
        name = $1,
@@ -39,7 +51,7 @@ export async function PUT(req, { params }) {
     [
       (body.name || "").trim(),
       phone,
-      normalizePhone(phone),
+      phoneNorm,
       body.email ? body.email.trim() : null,
       body.area ? body.area.trim() : null,
       body.unit ? body.unit.trim() : null,

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { withTransaction } from "@/lib/db";
-import { requireRole } from "@/lib/api-helpers";
+import {
+  duplicatePhoneResponse,
+  findDuplicatePhone,
+  requireRole,
+} from "@/lib/api-helpers";
 import { toContactedLead } from "@/lib/serializers";
 import { normalizePhone } from "@/lib/utils";
 
@@ -39,6 +43,30 @@ export async function POST(req, { params }) {
         throw err;
       }
       const f = fresh.rows[0];
+
+      // Guard: a contacted_leads row with the same phone may already
+      // exist (e.g., inserted manually). Fail before touching anything.
+      const dupCtc = await client.query(
+        `SELECT id, name, phone, status, sales_name
+         FROM contacted_leads
+         WHERE phone_normalized = $1 OR phone_normalized LIKE $2
+         LIMIT 1`,
+        [normalizePhone(f.phone), `%${normalizePhone(f.phone).slice(-9)}`]
+      );
+      if (dupCtc.rows.length > 0) {
+        const e = dupCtc.rows[0];
+        const err = new Error("duplicate");
+        err.code = "PHONE_ALREADY_EXISTS";
+        err.existing = {
+          location: "contacted",
+          id: e.id,
+          name: e.name,
+          phone: e.phone,
+          status: e.status,
+          salesName: e.sales_name,
+        };
+        throw err;
+      }
 
       const inserted = await client.query(
         `INSERT INTO contacted_leads (
@@ -81,6 +109,9 @@ export async function POST(req, { params }) {
   } catch (err) {
     if (err.code === "NOT_FOUND") {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    if (err.code === "PHONE_ALREADY_EXISTS") {
+      return duplicatePhoneResponse(err.existing);
     }
     throw err;
   }

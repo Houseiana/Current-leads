@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { requireRole } from "@/lib/api-helpers";
+import {
+  duplicatePhoneResponse,
+  findDuplicatePhone,
+  requireRole,
+} from "@/lib/api-helpers";
 import { toContactedLead } from "@/lib/serializers";
 import { normalizePhone } from "@/lib/utils";
 
@@ -35,6 +39,11 @@ export async function POST(req) {
   }
 
   const phone = body.phone.trim();
+  const phoneNorm = normalizePhone(phone);
+
+  const existing = await findDuplicatePhone(phoneNorm);
+  if (existing) return duplicatePhoneResponse(existing);
+
   const { rows } = await query(
     `INSERT INTO contacted_leads (
        name, phone, phone_normalized, email, area, unit,
@@ -48,7 +57,7 @@ export async function POST(req) {
     [
       body.name.trim(),
       phone,
-      normalizePhone(phone),
+      phoneNorm,
       body.email ? body.email.trim() : null,
       body.area ? body.area.trim() : null,
       body.unit ? body.unit.trim() : null,

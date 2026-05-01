@@ -30,6 +30,20 @@ async function jsonFetch(url, options = {}) {
 }
 
 function localizeError(err, t) {
+  if (err?.code === "PHONE_ALREADY_EXISTS") {
+    const e = err.existing || {};
+    if (e.location === "contacted") {
+      return t.errorAlreadyExistsContacted
+        .replace("{name}", e.name || "-")
+        .replace("{sales}", e.salesName || "-")
+        .replace("{status}", e.status || "-");
+    }
+    if (e.location === "fresh") {
+      return t.errorAlreadyExistsFresh.replace("{name}", e.name || "-");
+    }
+    return t.errorAlreadyExists;
+  }
+  // Legacy (kept for any in-flight requests against an older build)
   if (err?.code === "PHONE_EXISTS_IN_CONTACTED") {
     if (err.existing?.salesName && err.existing?.status) {
       return t.errorPhoneInContactedWith
