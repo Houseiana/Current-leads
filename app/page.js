@@ -8,7 +8,6 @@ import GlobalPhoneSearch from "@/components/GlobalPhoneSearch";
 import FreshLeadsSection from "@/components/FreshLeadsSection";
 import ContactedLeadsSection from "@/components/ContactedLeadsSection";
 import BlacklistSection from "@/components/BlacklistSection";
-import EmployeesSection from "@/components/EmployeesSection";
 import ConvertFreshLeadModal from "@/components/ConvertFreshLeadModal";
 import Toast from "@/components/Toast";
 
@@ -69,7 +68,6 @@ export default function HomePage() {
   const [freshLeads, setFreshLeads] = useState([]);
   const [contactedLeads, setContactedLeads] = useState([]);
   const [blacklist, setBlacklist] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [convertingLead, setConvertingLead] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -89,18 +87,16 @@ export default function HomePage() {
 
   const loadAll = async () => {
     try {
-      const [me, fresh, contacted, bl, emp] = await Promise.all([
+      const [me, fresh, contacted, bl] = await Promise.all([
         jsonFetch("/api/auth/me"),
         jsonFetch("/api/fresh-leads"),
         jsonFetch("/api/contacted-leads"),
         jsonFetch("/api/blacklist"),
-        jsonFetch("/api/employees"),
       ]);
       setUser(me.user);
       setFreshLeads(fresh.leads || []);
       setContactedLeads(contacted.leads || []);
       setBlacklist(bl.entries || []);
-      setEmployees(emp.employees || []);
     } catch {
       // middleware will redirect to /login on auth failure
     }
@@ -233,43 +229,6 @@ export default function HomePage() {
     showToast(t.successDeleted);
   };
 
-  const handleAddEmployee = async (data) => {
-    try {
-      const { employee } = await jsonFetch("/api/employees", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-      setEmployees((prev) => [employee, ...prev]);
-      showToast(t.successFreshAdded);
-    } catch (err) {
-      showError(err);
-      throw err;
-    }
-  };
-
-  const handleUpdateEmployee = async (id, data) => {
-    try {
-      const { employee } = await jsonFetch(`/api/employees/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
-      setEmployees((prev) => prev.map((e) => (e.id === id ? employee : e)));
-      showToast(t.successUpdated);
-    } catch (err) {
-      showError(err);
-      throw err;
-    }
-  };
-
-  const handleDeleteEmployee = async (id, password) => {
-    await jsonFetch(`/api/employees/${id}`, {
-      method: "DELETE",
-      body: JSON.stringify({ password }),
-    });
-    setEmployees((prev) => prev.filter((e) => e.id !== id));
-    showToast(t.successDeleted);
-  };
-
   const handleConvertConfirm = async (extraData) => {
     if (!convertingLead) return;
     try {
@@ -320,13 +279,6 @@ export default function HomePage() {
           >
             {t.blacklist}
           </button>
-          <button
-            type="button"
-            className={`tab ${activeTab === "employees" ? "active" : ""}`}
-            onClick={() => setActiveTab("employees")}
-          >
-            {t.employees}
-          </button>
         </div>
 
         {activeTab === "fresh" && (
@@ -358,16 +310,6 @@ export default function HomePage() {
             onAdd={handleAddBlacklist}
             onUpdate={handleUpdateBlacklist}
             onDelete={handleDeleteBlacklist}
-          />
-        )}
-        {activeTab === "employees" && (
-          <EmployeesSection
-            t={t}
-            language={language}
-            employees={employees}
-            onAdd={handleAddEmployee}
-            onUpdate={handleUpdateEmployee}
-            onDelete={handleDeleteEmployee}
           />
         )}
       </main>
