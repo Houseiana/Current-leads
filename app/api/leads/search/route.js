@@ -6,7 +6,7 @@ import {
   toContactedLead,
   toFreshLead,
 } from "@/lib/serializers";
-import { normalizePhone } from "@/lib/utils";
+import { displayName, normalizePhone } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -28,7 +28,7 @@ export async function POST(req) {
   const tail = norm.slice(-9);
   const tailPattern = `%${tail}`;
 
-  // 1. Blacklist — visible to both roles, highest priority
+  // 1. Blacklist (highest priority — visible to everyone)
   const blacklist = await query(
     `SELECT * FROM blacklist
      WHERE phone_normalized = $1 OR phone_normalized LIKE $2
@@ -50,38 +50,71 @@ export async function POST(req) {
     [norm, tailPattern]
   );
   if (contacted.rows.length > 0) {
-    const lead = toContactedLead(contacted.rows[0]);
+    const full = toContactedLead(contacted.rows[0]);
+
     if (auth.session.role === "sales") {
+      const owner = full.owner || null;
+      const isSelf = owner && owner === auth.session.username;
       return NextResponse.json({
         type: "contacted",
+        ownership: isSelf ? "self" : owner ? "other" : "noOwner",
+        ownerDisplay: owner ? displayName(owner) : null,
         lead: {
-          name: lead.name,
-          phone: lead.phone,
-          area: lead.area,
-          unit: lead.unit,
-          salesName: lead.salesName,
-          status: lead.status,
-          contactedAt: lead.contactedAt,
+          name: full.name,
+          phone: full.phone,
+          area: full.area,
+          unit: full.unit,
+          status: full.status,
+          contactedAt: full.contactedAt,
+          // expose only enough for sales to know the call status
+          // when it's their own client
+          ...(isSelf
+            ? {
+                email: full.email,
+                salesName: full.salesName,
+                callAt: full.callAt,
+                notes: full.notes,
+              }
+            : {}),
         },
       });
     }
-    return NextResponse.json({ type: "contacted", lead });
+
+    return NextResponse.json({ type: "contacted", lead: full });
   }
 
-  // 3. Fresh leads — admin only
-  if (auth.session.role === "admin") {
-    const fresh = await query(
-      `SELECT * FROM fresh_leads
-       WHERE phone_normalized = $1 OR phone_normalized LIKE $2
-       LIMIT 1`,
-      [norm, tailPattern]
-    );
-    if (fresh.rows.length > 0) {
+  // 3. Fresh leads — admin always sees; sales also sees but with ownership.
+  const fresh = await query(
+    `SELECT * FROM fresh_leads
+     WHERE phone_normalized = $1 OR phone_normalized LIKE $2
+     LIMIT 1`,
+    [norm, tailPattern]
+  );
+  if (fresh.rows.length > 0) {
+    const full = toFreshLead(fresh.rows[0]);
+    if (auth.session.role === "sales") {
+      const owner = full.owner || null;
+      const isSelf = owner && owner === auth.session.username;
       return NextResponse.json({
         type: "fresh",
-        lead: toFreshLead(fresh.rows[0]),
+        ownership: isSelf ? "self" : owner ? "other" : "noOwner",
+        ownerDisplay: owner ? displayName(owner) : null,
+        lead: {
+          name: full.name,
+          phone: full.phone,
+          area: full.area,
+          ...(isSelf
+            ? {
+                projectName: full.projectName,
+                leadSource: full.leadSource,
+                leadSourceLink: full.leadSourceLink,
+                createdAt: full.createdAt,
+              }
+            : {}),
+        },
       });
     }
+    return NextResponse.json({ type: "fresh", lead: full });
   }
 
   return NextResponse.json({ type: "none" });

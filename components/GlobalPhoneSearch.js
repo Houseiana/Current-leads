@@ -5,6 +5,19 @@ import StatusBadge from "./StatusBadge";
 import { formatDate } from "@/lib/utils";
 import { leadTypeLabel } from "@/lib/translations";
 
+function ownershipMessage(result, t) {
+  if (!result) return null;
+  if (result.ownership === "self") return t.ownershipSelf;
+  if (result.ownership === "other") {
+    return (t.ownershipOther || "").replace(
+      "{owner}",
+      result.ownerDisplay || "-"
+    );
+  }
+  if (result.ownership === "noOwner") return t.ownershipNoOwner;
+  return null;
+}
+
 export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
@@ -98,8 +111,14 @@ export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
       )}
 
       {result && result.type === "contacted" && (
-        <div className="search-result found-contacted">
-          <h3>{t.resultExisting}</h3>
+        <div
+          className={
+            salesMode && result.ownership === "other"
+              ? "search-result found-other-sales"
+              : "search-result found-contacted"
+          }
+        >
+          <h3>{salesMode ? ownershipMessage(result, t) : t.resultExisting}</h3>
           <div className="detail-grid">
             <div className="detail-item">
               <div className="label">{t.name}</div>
@@ -206,12 +225,6 @@ export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
               <div className="value">{result.lead.leadSource || "-"}</div>
             </div>
             <div className="detail-item">
-              <div className="label">{t.leadType}</div>
-              <div className="value">
-                {leadTypeLabel(result.lead.leadType, t)}
-              </div>
-            </div>
-            <div className="detail-item">
               <div className="label">{t.leadSourceLink}</div>
               <div className="value">
                 {result.lead.leadSourceLink ? (
@@ -227,6 +240,44 @@ export default function GlobalPhoneSearch({ t, language, salesMode = false }) {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {result && result.type === "fresh" && salesMode && (
+        <div
+          className={
+            result.ownership === "other" || result.ownership === "noOwner"
+              ? "search-result found-other-sales"
+              : "search-result found-fresh"
+          }
+        >
+          <h3>{ownershipMessage(result, t)}</h3>
+          <div className="detail-grid">
+            <div className="detail-item">
+              <div className="label">{t.name}</div>
+              <div className="value">{result.lead.name || "-"}</div>
+            </div>
+            <div className="detail-item">
+              <div className="label">{t.phone}</div>
+              <div className="value">{result.lead.phone || "-"}</div>
+            </div>
+            <div className="detail-item">
+              <div className="label">{t.area}</div>
+              <div className="value">{result.lead.area || "-"}</div>
+            </div>
+            {result.ownership === "self" && result.lead.projectName && (
+              <div className="detail-item">
+                <div className="label">{t.projectName}</div>
+                <div className="value">{result.lead.projectName}</div>
+              </div>
+            )}
+            {result.ownership === "self" && result.lead.leadSource && (
+              <div className="detail-item">
+                <div className="label">{t.leadSource}</div>
+                <div className="value">{result.lead.leadSource}</div>
+              </div>
+            )}
           </div>
         </div>
       )}

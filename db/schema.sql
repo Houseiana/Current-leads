@@ -18,10 +18,13 @@ CREATE TABLE IF NOT EXISTS fresh_leads (
   lead_source TEXT NOT NULL,
   lead_source_link TEXT,
   lead_type TEXT,
+  owner TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE fresh_leads ADD COLUMN IF NOT EXISTS lead_type TEXT;
+ALTER TABLE fresh_leads ADD COLUMN IF NOT EXISTS owner TEXT;
+CREATE INDEX IF NOT EXISTS idx_fresh_leads_owner ON fresh_leads(owner);
 
 CREATE INDEX IF NOT EXISTS idx_fresh_leads_phone_norm
   ON fresh_leads(phone_normalized);
@@ -52,6 +55,8 @@ CREATE TABLE IF NOT EXISTS contacted_leads (
 ALTER TABLE contacted_leads ADD COLUMN IF NOT EXISTS lead_type TEXT;
 ALTER TABLE contacted_leads ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE contacted_leads ADD COLUMN IF NOT EXISTS call_at TIMESTAMPTZ;
+ALTER TABLE contacted_leads ADD COLUMN IF NOT EXISTS owner TEXT;
+CREATE INDEX IF NOT EXISTS idx_contacted_leads_owner ON contacted_leads(owner);
 
 CREATE INDEX IF NOT EXISTS idx_contacted_leads_phone_norm
   ON contacted_leads(phone_normalized);

@@ -507,6 +507,20 @@ button {
   background: var(--color-danger-soft);
   border-color: #fecaca;
 }
+.panel.sales-greeting {
+  background: linear-gradient(135deg, #fffbe6 0%, #fff 60%);
+  border-color: var(--color-accent);
+}
+
+.search-result.found-other-sales {
+  background: #fff7ed;
+  border-color: #f97316;
+  color: #7c2d12;
+}
+.search-result.found-other-sales h3 {
+  color: #c2410c;
+  font-weight: 700;
+}
 .search-result.blacklisted {
   background: #1f2937;
   color: #fff;

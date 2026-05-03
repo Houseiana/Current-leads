@@ -31,7 +31,13 @@ const EMPTY = {
   callAt: "",
 };
 
-export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
+export default function ContactedLeadForm({
+  t,
+  initial,
+  onSubmit,
+  onCancel,
+  hideSalesName = false,
+}) {
   const isEdit = !!initial;
   const [form, setForm] = useState(() => ({
     ...EMPTY,
@@ -50,7 +56,7 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
     const e = {};
     if (!form.name.trim()) e.name = t.requiredField;
     if (!form.phone.trim()) e.phone = t.requiredField;
-    if (!form.salesName.trim()) e.salesName = t.requiredField;
+    if (!hideSalesName && !form.salesName.trim()) e.salesName = t.requiredField;
     if (!form.status) e.status = t.requiredField;
     if (form.email && !isValidEmail(form.email)) e.email = t.invalidEmail;
     if (form.unitLink && !isValidUrl(form.unitLink))
@@ -157,24 +163,26 @@ export default function ContactedLeadForm({ t, initial, onSubmit, onCancel }) {
             onChange={(e) => setField("unit", e.target.value)}
           />
         </div>
-        <div className="field">
-          <label>{t.salesName} *</label>
-          <select
-            className="select"
-            value={form.salesName}
-            onChange={(e) => setField("salesName", e.target.value)}
-          >
-            <option value="">{t.selectSales}</option>
-            {SALES_NAMES.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-          {errors.salesName && (
-            <span className="error">{errors.salesName}</span>
-          )}
-        </div>
+        {!hideSalesName && (
+          <div className="field">
+            <label>{t.salesName} *</label>
+            <select
+              className="select"
+              value={form.salesName}
+              onChange={(e) => setField("salesName", e.target.value)}
+            >
+              <option value="">{t.selectSales}</option>
+              {SALES_NAMES.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            {errors.salesName && (
+              <span className="error">{errors.salesName}</span>
+            )}
+          </div>
+        )}
         <div className="field">
           <label>{t.salesPhoneUsed}</label>
           <input
