@@ -2,7 +2,31 @@
 
 import { useEffect, useState } from "react";
 import StatusBadge from "./StatusBadge";
+import FreshLeadForm from "./FreshLeadForm";
+import FreshLeadDetailsModal from "./FreshLeadDetailsModal";
+import ContactedLeadForm from "./ContactedLeadForm";
+import ContactedLeadDetailsModal from "./ContactedLeadDetailsModal";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { formatDate } from "@/lib/utils";
+
+async function jsonFetch(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data?.error || "Request failed");
+    err.status = res.status;
+    err.code = data?.code;
+    err.existing = data?.existing;
+    throw err;
+  }
+  return data;
+}
 
 export default function MyClientsView({ t, language }) {
   const [tab, setTab] = useState("contacted");
@@ -10,6 +34,11 @@ export default function MyClientsView({ t, language }) {
   const [contacted, setContacted] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Modal state — { type: "fresh" | "contacted", lead }
+  const [viewing, setViewing] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -37,6 +66,22 @@ export default function MyClientsView({ t, language }) {
   useEffect(() => {
     load();
   }, []);
+
+  const handleUpdate = async (type, id, data) => {
+    await jsonFetch(`/api/${type}-leads/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    await load();
+  };
+
+  const handleDelete = async (type, id, password) => {
+    await jsonFetch(`/api/${type}-leads/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ password }),
+    });
+    await load();
+  };
 
   const empty = fresh.length === 0 && contacted.length === 0;
 
@@ -80,6 +125,7 @@ export default function MyClientsView({ t, language }) {
                 <th>{t.status}</th>
                 <th>{t.callAt}</th>
                 <th>{t.contactedAt}</th>
+                <th style={{ width: 1, whiteSpace: "nowrap" }}>{t.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -95,6 +141,31 @@ export default function MyClientsView({ t, language }) {
                   </td>
                   <td data-label={t.contactedAt}>
                     {formatDate(l.contactedAt, language)}
+                  </td>
+                  <td data-label={t.actions}>
+                    <div className="row-actions">
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={() => setViewing({ type: "contacted", lead: l })}
+                      >
+                        {t.view}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={() => setEditing({ type: "contacted", lead: l })}
+                      >
+                        {t.edit}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger"
+                        onClick={() => setDeleting({ type: "contacted", lead: l })}
+                      >
+                        {t.delete}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -114,6 +185,7 @@ export default function MyClientsView({ t, language }) {
                 <th>{t.projectName}</th>
                 <th>{t.leadSource}</th>
                 <th>{t.createdAt}</th>
+                <th style={{ width: 1, whiteSpace: "nowrap" }}>{t.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -127,11 +199,91 @@ export default function MyClientsView({ t, language }) {
                   <td data-label={t.createdAt}>
                     {formatDate(l.createdAt, language)}
                   </td>
+                  <td data-label={t.actions}>
+                    <div className="row-actions">
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={() => setViewing({ type: "fresh", lead: l })}
+                      >
+                        {t.view}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={() => setEditing({ type: "fresh", lead: l })}
+                      >
+                        {t.edit}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger"
+                        onClick={() => setDeleting({ type: "fresh", lead: l })}
+                      >
+                        {t.delete}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* View modals */}
+      {viewing?.type === "fresh" && (
+        <FreshLeadDetailsModal
+          t={t}
+          language={language}
+          lead={viewing.lead}
+          onClose={() => setViewing(null)}
+        />
+      )}
+      {viewing?.type === "contacted" && (
+        <ContactedLeadDetailsModal
+          t={t}
+          language={language}
+          lead={viewing.lead}
+          onClose={() => setViewing(null)}
+        />
+      )}
+
+      {/* Edit modals — both forms ask for the manager password (edit mode) */}
+      {editing?.type === "fresh" && (
+        <FreshLeadForm
+          t={t}
+          initial={editing.lead}
+          onCancel={() => setEditing(null)}
+          onSubmit={async (data) => {
+            await handleUpdate("fresh", editing.lead.id, data);
+            setEditing(null);
+          }}
+        />
+      )}
+      {editing?.type === "contacted" && (
+        <ContactedLeadForm
+          t={t}
+          initial={editing.lead}
+          hideSalesName
+          onCancel={() => setEditing(null)}
+          onSubmit={async (data) => {
+            await handleUpdate("contacted", editing.lead.id, data);
+            setEditing(null);
+          }}
+        />
+      )}
+
+      {/* Delete modal — already asks for the manager password */}
+      {deleting && (
+        <ConfirmDeleteModal
+          t={t}
+          onCancel={() => setDeleting(null)}
+          onConfirm={async (password) => {
+            await handleDelete(deleting.type, deleting.lead.id, password);
+            setDeleting(null);
+          }}
+        />
       )}
     </div>
   );

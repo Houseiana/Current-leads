@@ -13,7 +13,7 @@ import { normalizePhone } from "@/lib/utils";
 export const runtime = "nodejs";
 
 export async function PUT(req, { params }) {
-  const auth = await requireRole("admin");
+  const auth = await requireRole(["admin", "sales"]);
   if (auth.error) return auth.error;
 
   let body;
@@ -25,6 +25,17 @@ export async function PUT(req, { params }) {
 
   const pw = checkActionPassword(body?.password);
   if (pw.error) return pw.error;
+
+  // Sales can only edit leads they own.
+  if (auth.session.role === "sales") {
+    const own = await query(
+      "SELECT owner FROM fresh_leads WHERE id = $1",
+      [params.id]
+    );
+    if (own.rows.length === 0 || own.rows[0].owner !== auth.session.username) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+  }
 
   const phone = (body.phone || "").trim();
   const phoneNorm = normalizePhone(phone);
@@ -66,13 +77,18 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  const auth = await requireRole("admin");
+  const auth = await requireRole(["admin", "sales"]);
   if (auth.error) return auth.error;
   const pw = await requireDeletePassword(req);
   if (pw.error) return pw.error;
-  const { rowCount } = await query("DELETE FROM fresh_leads WHERE id = $1", [
-    params.id,
-  ]);
+
+  let sql = "DELETE FROM fresh_leads WHERE id = $1";
+  const args = [params.id];
+  if (auth.session.role === "sales") {
+    sql += " AND owner = $2";
+    args.push(auth.session.username);
+  }
+  const { rowCount } = await query(sql, args);
   if (!rowCount) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
