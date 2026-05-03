@@ -179,9 +179,7 @@ export default function SalesPage() {
           </div>
         </div>
 
-        {view === "home" && (
-          <GlobalPhoneSearch t={t} language={language} salesMode />
-        )}
+        <GlobalPhoneSearch t={t} language={language} salesMode />
 
         {view === "myClients" && (
           <MyClientsView key={refreshKey} t={t} language={language} />
