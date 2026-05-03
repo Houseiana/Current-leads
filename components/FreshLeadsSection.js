@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardCards from "./DashboardCards";
 import FilterBar from "./FilterBar";
 import FreshLeadForm from "./FreshLeadForm";
@@ -22,11 +22,22 @@ export default function FreshLeadsSection({
   const [editing, setEditing] = useState(null);
   const [viewing, setViewing] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [salesUsers, setSalesUsers] = useState([]);
   const [filters, setFilters] = useState({
     area: "",
     projectName: "",
     leadSource: "",
+    owner: "",
   });
+
+  useEffect(() => {
+    fetch("/api/users/sales")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.users) setSalesUsers(d.users);
+      })
+      .catch(() => {});
+  }, []);
 
   const filteredLeads = useMemo(() => {
     return leads.filter((l) => {
@@ -35,6 +46,13 @@ export default function FreshLeadsSection({
         return false;
       if (filters.leadSource && l.leadSource !== filters.leadSource)
         return false;
+      if (filters.owner) {
+        if (filters.owner === "__unassigned__") {
+          if (l.owner) return false;
+        } else if (l.owner !== filters.owner) {
+          return false;
+        }
+      }
       return true;
     });
   }, [leads, filters]);
@@ -68,6 +86,17 @@ export default function FreshLeadsSection({
         value: v,
         label: v,
       })),
+    },
+    {
+      key: "owner",
+      label: t.assignTo,
+      options: [
+        { value: "__unassigned__", label: t.unassigned },
+        ...salesUsers.map((u) => ({
+          value: u.username,
+          label: u.displayName,
+        })),
+      ],
     },
   ];
 
@@ -125,6 +154,7 @@ export default function FreshLeadsSection({
         <FreshLeadForm
           t={t}
           initial={editing}
+          salesUsers={salesUsers}
           onCancel={() => {
             setShowForm(false);
             setEditing(null);

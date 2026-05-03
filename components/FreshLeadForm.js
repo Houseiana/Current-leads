@@ -13,10 +13,18 @@ const EMPTY = {
   leadSource: "",
   leadSourceLink: "",
   leadType: "",
+  owner: "",
 };
 
-export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
+export default function FreshLeadForm({
+  t,
+  initial,
+  onSubmit,
+  onCancel,
+  salesUsers,
+}) {
   const isEdit = !!initial;
+  const showAssign = Array.isArray(salesUsers);
   const [form, setForm] = useState({ ...EMPTY, ...(initial || {}) });
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -55,6 +63,7 @@ export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
         leadSource: form.leadSource.trim(),
         leadSourceLink: form.leadSourceLink.trim(),
         leadType: form.leadType,
+        ...(showAssign ? { owner: form.owner } : {}),
         ...(isEdit ? { password } : {}),
       });
     } catch (err) {
@@ -159,6 +168,23 @@ export default function FreshLeadForm({ t, initial, onSubmit, onCancel }) {
             ))}
           </select>
         </div>
+        {showAssign && (
+          <div className="field">
+            <label>{t.assignTo}</label>
+            <select
+              className="select"
+              value={form.owner || ""}
+              onChange={(e) => setField("owner", e.target.value)}
+            >
+              <option value="">{t.unassigned}</option>
+              {salesUsers.map((u) => (
+                <option key={u.username} value={u.username}>
+                  {u.displayName}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="field" style={{ gridColumn: "1 / -1" }}>
           <label>{t.leadSourceLink}</label>
           <input

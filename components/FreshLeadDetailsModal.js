@@ -1,7 +1,7 @@
 "use client";
 
 import Modal from "./Modal";
-import { formatDate } from "@/lib/utils";
+import { displayName, formatDate } from "@/lib/utils";
 import { leadTypeLabel } from "@/lib/translations";
 
 export default function FreshLeadDetailsModal({ t, language, lead, onClose }) {
@@ -40,6 +40,12 @@ export default function FreshLeadDetailsModal({ t, language, lead, onClose }) {
         <div className="detail-item">
           <div className="label">{t.leadType}</div>
           <div className="value">{leadTypeLabel(lead.leadType, t)}</div>
+        </div>
+        <div className="detail-item">
+          <div className="label">{t.assignTo}</div>
+          <div className="value">
+            {lead.owner ? displayName(lead.owner) : t.unassigned}
+          </div>
         </div>
         <div className="detail-item">
           <div className="label">{t.leadSourceLink}</div>

@@ -45,6 +45,15 @@ export async function PUT(req, { params }) {
   });
   if (existing) return duplicatePhoneResponse(existing);
 
+  // Admins can reassign by sending body.owner (or unset by sending "").
+  // Sales can't change ownership at all.
+  const isAdmin = auth.session.role === "admin";
+  const ownerToSet = isAdmin
+    ? body.owner
+      ? String(body.owner).trim() || null
+      : null
+    : null;
+
   const { rows } = await query(
     `UPDATE fresh_leads SET
        name = $1,
@@ -55,8 +64,9 @@ export async function PUT(req, { params }) {
        lead_source = $6,
        lead_source_link = $7,
        lead_type = $8,
+       owner = CASE WHEN $9::boolean THEN $10 ELSE owner END,
        updated_at = NOW()
-     WHERE id = $9
+     WHERE id = $11
      RETURNING *`,
     [
       (body.name || "").trim(),
@@ -67,6 +77,8 @@ export async function PUT(req, { params }) {
       (body.leadSource || "").trim(),
       body.leadSourceLink ? body.leadSourceLink.trim() : null,
       body.leadType ? body.leadType.trim() : null,
+      isAdmin,
+      ownerToSet,
       params.id,
     ]
   );

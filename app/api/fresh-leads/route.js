@@ -53,8 +53,14 @@ export async function POST(req) {
   const existing = await findDuplicatePhone(phoneNorm);
   if (existing) return duplicatePhoneResponse(existing);
 
+  // Sales: owner = themselves. Admin: can pick the owner via body.owner
+  // (a sales username), or leave it as null for unassigned.
   const owner =
-    auth.session.role === "sales" ? auth.session.username : null;
+    auth.session.role === "sales"
+      ? auth.session.username
+      : body.owner
+      ? String(body.owner).trim() || null
+      : null;
 
   const { rows } = await query(
     `INSERT INTO fresh_leads

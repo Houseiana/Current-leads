@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDate } from "@/lib/utils";
+import { displayName, formatDate } from "@/lib/utils";
 import { leadTypeLabel } from "@/lib/translations";
 
 export default function FreshLeadTable({
@@ -23,6 +23,7 @@ export default function FreshLeadTable({
             <th>{t.projectName}</th>
             <th>{t.leadSource}</th>
             <th>{t.leadType}</th>
+            <th>{t.assignTo}</th>
             <th>{t.leadSourceLink}</th>
             <th>{t.createdAt}</th>
             <th style={{ width: 1, whiteSpace: "nowrap" }}>{t.actions}</th>
@@ -31,7 +32,7 @@ export default function FreshLeadTable({
         <tbody>
           {leads.length === 0 && (
             <tr className="empty-row">
-              <td colSpan={9}>{t.noLeads}</td>
+              <td colSpan={10}>{t.noLeads}</td>
             </tr>
           )}
           {leads.map((lead) => (
@@ -47,6 +48,13 @@ export default function FreshLeadTable({
               <td data-label={t.projectName}>{lead.projectName}</td>
               <td data-label={t.leadSource}>{lead.leadSource}</td>
               <td data-label={t.leadType}>{leadTypeLabel(lead.leadType, t)}</td>
+              <td data-label={t.assignTo}>
+                {lead.owner ? (
+                  displayName(lead.owner)
+                ) : (
+                  <em style={{ color: "var(--color-muted)" }}>{t.unassigned}</em>
+                )}
+              </td>
               <td data-label={t.leadSourceLink}>
                 {lead.leadSourceLink ? (
                   <a
