@@ -6,6 +6,7 @@ import FreshLeadForm from "./FreshLeadForm";
 import FreshLeadDetailsModal from "./FreshLeadDetailsModal";
 import ContactedLeadForm from "./ContactedLeadForm";
 import ContactedLeadDetailsModal from "./ContactedLeadDetailsModal";
+import ConvertFreshLeadModal from "./ConvertFreshLeadModal";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { formatDate } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ export default function MyClientsView({ t, language }) {
   const [viewing, setViewing] = useState(null);
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [converting, setConverting] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -81,6 +83,15 @@ export default function MyClientsView({ t, language }) {
       body: JSON.stringify({ password }),
     });
     await load();
+  };
+
+  const handleConvert = async (id, data) => {
+    await jsonFetch(`/api/fresh-leads/${id}/convert`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    await load();
+    setTab("contacted");
   };
 
   const empty = fresh.length === 0 && contacted.length === 0;
@@ -217,6 +228,15 @@ export default function MyClientsView({ t, language }) {
                       </button>
                       <button
                         type="button"
+                        className="btn btn-sm btn-primary"
+                        style={{ whiteSpace: "nowrap" }}
+                        title={t.transferToContacted}
+                        onClick={() => setConverting(l)}
+                      >
+                        → {t.transferShort}
+                      </button>
+                      <button
+                        type="button"
                         className="btn btn-sm btn-danger"
                         onClick={() => setDeleting({ type: "fresh", lead: l })}
                       >
@@ -270,6 +290,20 @@ export default function MyClientsView({ t, language }) {
           onSubmit={async (data) => {
             await handleUpdate("contacted", editing.lead.id, data);
             setEditing(null);
+          }}
+        />
+      )}
+
+      {/* Convert (Transfer to Contacted) — sales fills in the missing data */}
+      {converting && (
+        <ConvertFreshLeadModal
+          t={t}
+          lead={converting}
+          hideSalesName
+          onCancel={() => setConverting(null)}
+          onConfirm={async (data) => {
+            await handleConvert(converting.id, data);
+            setConverting(null);
           }}
         />
       )}

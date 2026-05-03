@@ -6,19 +6,25 @@ import {
   requireRole,
 } from "@/lib/api-helpers";
 import { toContactedLead } from "@/lib/serializers";
-import { normalizePhone } from "@/lib/utils";
+import { displayName, normalizePhone } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
 export async function POST(req, { params }) {
-  const auth = await requireRole("admin");
+  const auth = await requireRole(["admin", "sales"]);
   if (auth.error) return auth.error;
+  const isSales = auth.session.role === "sales";
 
   let body;
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  }
+
+  // Sales reps don't pick a sales name — it's their own.
+  if (isSales && !body?.salesName) {
+    body.salesName = displayName(auth.session.username);
   }
 
   if (!body?.salesName?.toString().trim()) {
@@ -43,6 +49,13 @@ export async function POST(req, { params }) {
         throw err;
       }
       const f = fresh.rows[0];
+
+      // Sales can only convert leads they own.
+      if (isSales && f.owner !== auth.session.username) {
+        const err = new Error("not_found");
+        err.code = "NOT_FOUND";
+        throw err;
+      }
 
       // Guard: a contacted_leads row with the same phone may already
       // exist (e.g., inserted manually). Fail before touching anything.
@@ -73,12 +86,12 @@ export async function POST(req, { params }) {
            name, phone, phone_normalized, email, area, unit,
            sales_name, sales_phone_used, sales_whatsapp_used,
            status, unit_link, web_lead_source_link, lead_type, notes,
-           call_at, created_at, updated_at, contacted_at
+           call_at, owner, created_at, updated_at, contacted_at
          ) VALUES (
            $1, $2, $3, $4, $5, $6,
            $7, $8, $9,
            $10, $11, $12, $13, $14,
-           $15, $16, NOW(), NOW()
+           $15, $16, $17, NOW(), NOW()
          ) RETURNING *`,
         [
           f.name,
@@ -96,6 +109,7 @@ export async function POST(req, { params }) {
           body.leadType ? body.leadType.trim() : f.lead_type,
           body.notes ? body.notes.toString().trim() : null,
           body.callAt || null,
+          f.owner || null,
           f.created_at,
         ]
       );
