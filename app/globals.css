@@ -739,4 +739,143 @@ button {
     font-size: 12px;
     text-transform: uppercase;
   }
+  /* Action buttons inside stacked-card rows: pull to one line */
+  .table-wrap.responsive .row-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* ====== MOBILE (<= 640px) ====== */
+@media (max-width: 640px) {
+  /* Prevent iOS Safari from auto-zooming on focus */
+  .input,
+  .select,
+  .textarea {
+    font-size: 16px;
+  }
+
+  /* Tighter container padding so cards aren't pinched */
+  .container {
+    padding: 12px;
+  }
+
+  /* Bigger touch targets */
+  .btn {
+    padding: 10px 14px;
+    min-height: 40px;
+  }
+  .btn-primary,
+  .btn-danger {
+    min-height: 44px;
+  }
+  .btn-sm {
+    padding: 8px 10px;
+    min-height: 34px;
+  }
+
+  /* Header: keep all controls usable, hide app title text below 480px */
+  .header .container {
+    padding: 10px 12px;
+  }
+  .brand {
+    font-size: 15px;
+    gap: 8px;
+  }
+
+  /* Tabs scroll horizontally without clipping */
+  .tabs {
+    margin: 12px -12px 16px;
+    padding: 0 12px;
+  }
+  .tab {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Stat cards: 2 per row instead of crammed */
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .card .value {
+    font-size: 20px;
+  }
+
+  /* Panel padding tighter */
+  .panel {
+    padding: 12px;
+  }
+  .panel-title {
+    font-size: 15px;
+  }
+
+  /* Form grid -> single column */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Modals: take the whole viewport */
+  .modal-backdrop {
+    padding: 0;
+    align-items: stretch;
+  }
+  .modal {
+    max-width: 100%;
+    border-radius: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-body {
+    padding: 14px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .modal-header {
+    padding: 12px 14px;
+  }
+  .modal-footer {
+    padding: 12px 14px;
+    position: sticky;
+    bottom: 0;
+  }
+
+  /* Sales greeting card */
+  .panel.sales-greeting .row-actions .btn {
+    flex: 1 1 calc(50% - 4px);
+    justify-content: center;
+  }
+
+  /* Toast: not glued to a corner where iOS keyboard hides it */
+  .toast {
+    inset-inline-start: 12px;
+    inset-inline-end: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+
+  /* Login chooser: stack the two role cards */
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Search-result detail grid: single column on mobile */
+  .search-result .detail-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand span:not(.brand-logo) {
+    display: none;
+  }
+  .user-chip-name {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
