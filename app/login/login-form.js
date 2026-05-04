@@ -37,9 +37,26 @@ export default function LoginForm({ role }) {
     saveLanguage(lang);
   };
 
-  const title = role === "admin" ? t.adminSignIn : t.salesSignIn;
-  const subtitle = role === "admin" ? t.adminSignInSub : t.salesSignInSub;
-  const accentClass = role === "admin" ? "login-accent-admin" : "login-accent-sales";
+  const title =
+    role === "admin"
+      ? t.adminSignIn
+      : role === "dataentry"
+      ? t.dataEntrySignIn
+      : t.salesSignIn;
+  const subtitle =
+    role === "admin"
+      ? t.adminSignInSub
+      : role === "dataentry"
+      ? t.dataEntrySignInSub
+      : t.salesSignInSub;
+  const accentClass =
+    role === "admin"
+      ? "login-accent-admin"
+      : role === "dataentry"
+      ? "login-accent-dataentry"
+      : "login-accent-sales";
+  const logoLetter =
+    role === "admin" ? "A" : role === "dataentry" ? "D" : "S";
 
   const submit = async (e) => {
     e.preventDefault();
@@ -63,7 +80,13 @@ export default function LoginForm({ role }) {
         setLoading(false);
         return;
       }
-      router.replace(data.role === "admin" ? "/" : "/sales");
+      router.replace(
+        data.role === "admin"
+          ? "/"
+          : data.role === "dataentry"
+          ? "/dataentry"
+          : "/sales"
+      );
       router.refresh();
     } catch {
       setError(t.networkError || t.invalidCredentials);
@@ -75,7 +98,7 @@ export default function LoginForm({ role }) {
     <div className={`login-card ${accentClass}`}>
       <div className="login-header">
         <div className="brand">
-          <span className="brand-logo">{role === "admin" ? "A" : "S"}</span>
+          <span className="brand-logo">{logoLetter}</span>
           <span>{t.appTitle}</span>
         </div>
         <LanguageSwitcher language={language} onChange={onLanguageChange} />

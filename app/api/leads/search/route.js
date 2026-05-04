@@ -11,7 +11,7 @@ import { displayName, normalizePhone } from "@/lib/utils";
 export const runtime = "nodejs";
 
 export async function POST(req) {
-  const auth = await requireRole(["admin", "sales"]);
+  const auth = await requireRole(["admin", "sales", "dataentry"]);
   if (auth.error) return auth.error;
 
   let body;
@@ -52,7 +52,7 @@ export async function POST(req) {
   if (contacted.rows.length > 0) {
     const full = toContactedLead(contacted.rows[0]);
 
-    if (auth.session.role === "sales") {
+    if (auth.session.role !== "admin") {
       const owner = full.owner || null;
       const isSelf = owner && owner === auth.session.username;
       return NextResponse.json({
@@ -83,7 +83,7 @@ export async function POST(req) {
     return NextResponse.json({ type: "contacted", lead: full });
   }
 
-  // 3. Fresh leads — admin always sees; sales also sees but with ownership.
+  // 3. Fresh leads — admin always sees; sales / dataentry also see with ownership.
   const fresh = await query(
     `SELECT * FROM fresh_leads
      WHERE phone_normalized = $1 OR phone_normalized LIKE $2
@@ -92,7 +92,7 @@ export async function POST(req) {
   );
   if (fresh.rows.length > 0) {
     const full = toFreshLead(fresh.rows[0]);
-    if (auth.session.role === "sales") {
+    if (auth.session.role !== "admin") {
       const owner = full.owner || null;
       const isSelf = owner && owner === auth.session.username;
       return NextResponse.json({

@@ -622,6 +622,13 @@ button {
   background: #dbeafe;
   color: #1e40af;
 }
+.login-card.login-accent-dataentry {
+  border-top: 4px solid #16a34a;
+}
+.login-card.login-accent-dataentry .brand-logo {
+  background: #dcfce7;
+  color: #15803d;
+}
 
 .login-footer {
   margin-top: 16px;
@@ -669,6 +676,18 @@ button {
   border-color: #93c5fd;
   background: linear-gradient(180deg, #fff 0%, #dbeafe 100%);
 }
+.role-card.role-dataentry {
+  border-color: #86efac;
+  background: linear-gradient(180deg, #fff 0%, #dcfce7 100%);
+}
+.role-grid.role-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 600px) {
+  .role-grid.role-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
 .role-icon {
   width: 44px;
   height: 44px;
@@ -689,6 +708,11 @@ button {
 .role-card.role-sales .role-icon {
   background: #2563eb;
   border-color: #1e40af;
+  color: #fff;
+}
+.role-card.role-dataentry .role-icon {
+  background: #16a34a;
+  border-color: #15803d;
   color: #fff;
 }
 .role-name {

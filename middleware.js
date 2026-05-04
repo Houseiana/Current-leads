@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const COOKIE_NAME = "app_session";
-const LOGIN_PATHS = ["/login", "/login/admin", "/login/sales"];
+const LOGIN_PATHS = [
+  "/login",
+  "/login/admin",
+  "/login/sales",
+  "/login/dataentry",
+];
 
 async function readSession(req) {
   const token = req.cookies.get(COOKIE_NAME)?.value;
@@ -21,14 +26,22 @@ async function readSession(req) {
   }
 }
 
+function homeForRole(role) {
+  if (role === "admin") return "/";
+  if (role === "sales") return "/sales";
+  if (role === "dataentry") return "/dataentry";
+  return "/login";
+}
+
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
   const session = await readSession(req);
 
   if (LOGIN_PATHS.includes(pathname)) {
     if (session) {
-      const dest = session.role === "admin" ? "/" : "/sales";
-      return NextResponse.redirect(new URL(dest, req.url));
+      return NextResponse.redirect(
+        new URL(homeForRole(session.role), req.url)
+      );
     }
     return NextResponse.next();
   }
@@ -38,15 +51,24 @@ export async function middleware(req) {
   }
 
   if (pathname === "/" && session.role !== "admin") {
-    return NextResponse.redirect(new URL("/sales", req.url));
+    return NextResponse.redirect(new URL(homeForRole(session.role), req.url));
   }
   if (pathname.startsWith("/sales") && session.role !== "sales") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL(homeForRole(session.role), req.url));
+  }
+  if (pathname.startsWith("/dataentry") && session.role !== "dataentry") {
+    return NextResponse.redirect(new URL(homeForRole(session.role), req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/sales/:path*", "/login", "/login/:path*"],
+  matcher: [
+    "/",
+    "/sales/:path*",
+    "/dataentry/:path*",
+    "/login",
+    "/login/:path*",
+  ],
 };

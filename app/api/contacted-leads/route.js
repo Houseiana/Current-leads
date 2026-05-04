@@ -30,7 +30,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
-  const auth = await requireRole(["admin", "sales"]);
+  const auth = await requireRole(["admin", "sales", "dataentry"]);
   if (auth.error) return auth.error;
 
   let body;

@@ -44,7 +44,7 @@ export default function LoginChooser() {
       <h1 className="login-title">{t.signIn}</h1>
       <p className="login-sub">{t.selectRolePrompt}</p>
 
-      <div className="role-grid">
+      <div className="role-grid role-grid-3">
         <Link href="/login/admin" className="role-card role-admin">
           <span className="role-icon">A</span>
           <span className="role-name">{t.adminSignIn}</span>
@@ -54,6 +54,11 @@ export default function LoginChooser() {
           <span className="role-icon">S</span>
           <span className="role-name">{t.salesSignIn}</span>
           <span className="role-desc">{t.salesSignInSub}</span>
+        </Link>
+        <Link href="/login/dataentry" className="role-card role-dataentry">
+          <span className="role-icon">D</span>
+          <span className="role-name">{t.dataEntrySignIn}</span>
+          <span className="role-desc">{t.dataEntrySignInSub}</span>
         </Link>
       </div>
     </div>
